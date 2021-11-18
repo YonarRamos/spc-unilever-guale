@@ -1,0 +1,9 @@
+stages:
+  - despliegue
+
+deploy:
+  stage: despliegue
+  script:
+    - docker-compose up -d
+  only:
+    - master

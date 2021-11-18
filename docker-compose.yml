@@ -1,0 +1,52 @@
+version: "3.0"
+services:
+  redis:
+    image: redis
+    container_name: "control_estadistico_proceso_hc_database_memory"
+    restart: always
+    networks:
+      - net
+  api:
+    image: node-git
+    container_name: "control_estadistico_proceso_hc_api"
+    restart: always
+    depends_on:
+      - redis
+    volumes:
+      - ./api:/opt/control_estadistico_proceso_hc
+    working_dir: "/opt/control_estadistico_proceso_hc"
+    command: ["bash", "run.sh"]
+    networks:
+      - net
+  client:
+    image: node-git
+    container_name: "control_estadistico_proceso_hc_client"
+    restart: always
+    depends_on:
+      - api
+    volumes:
+      - ./client:/opt/control_estadistico_proceso_hc
+    working_dir: "/opt/control_estadistico_proceso_hc"
+    environment:
+      MODE: dev
+      HOST: 0.0.0.0
+      PORT: 3000
+    command: ["bash", "run.sh"]
+    networks:
+      - net
+  proxy:
+    image: nginx
+    container_name: "control_estadistico_proceso_hc_proxy"
+    restart: always
+    ports:
+      - "82:80"
+    volumes:
+      - ./proxy:/etc/nginx/conf.d
+    depends_on:
+      - client
+      - api
+    networks:
+      - net
+networks:
+  net:
+    driver: bridge
