@@ -239,7 +239,7 @@ module.exports = {
       const tendenciasAgrupadas = _.groupBy(tendencias, 'ultima_actualizacion')
       //Genero las iteraciones de tiempo para trabajar los datos
       for(const key in tendenciasAgrupadas){
-        const iteraciones = await FechaAdquisicion.arrayIteraciones(key, moment(fechaActual[0].date).format('YYYY-MM-DD HH:mm:ss') , moment(fechaActual[0].date).format('YYYY-MM-DD HH:mm:ss'))
+        const iteraciones = await FechaAdquisicion.arrayIteraciones(key, moment(fechaActual[0].date).format('YYYY-MM-DD HH:mm:ss'))
         //Consulto al historian la info de las tendencias necesarias en el rango de fecha
         for await(const fecha of iteraciones){
           const valuesAgrupados = await TomaDatos.getData(tendenciasAgrupadas[key], fecha.desde, fecha.hasta)   
@@ -252,7 +252,7 @@ module.exports = {
             var datosCP = variable.tag_codigo_producto ? valuesAgrupados[`${variable.codigo_producto.tag_name}`] : undefined
             var datosFT = variable.tag_filtro ? valuesAgrupados[`${variable.filtro.tag_name}`] : []
             //Chequeo que tenga algun PV, si la tendencia no tiene PV ni la muestro
-            if(datosPV != undefined){
+            if(datosPV !== undefined){
               if(datosPV.length > 0){
                 var datosFiltrados = {tendencia_id: variable.id, tk: variable.mixer_id, sp: [], pv: [], cp: [], filtro: []}
                
@@ -266,7 +266,7 @@ module.exports = {
                 //Si hay algun datos sin filtrar lo filtro
                 if(datosNoFiltrados.sp.length > 0){
                   var filtro = []
-                  if(variable.filtro && datosFT != undefined){
+                  if(variable.filtro && datosFT !== undefined){
                     filtro = datosFT
                   }else{
                     if(datosFiltrados.pv.length > 0){
@@ -281,7 +281,7 @@ module.exports = {
                 }
                 if(datosNoFiltrados.pv.length > 0){
                   var filtro = []
-                  if(variable.filtro && datosFT != undefined){
+                  if(variable.filtro && datosFT !== undefined){
                     
                     filtro = datosFT
                   }else{
@@ -298,7 +298,7 @@ module.exports = {
                   
                 if(datosNoFiltrados.cp.length > 0){
                   var filtro = []
-                  if(variable.filtro&& datosFT != undefined){
+                  if(variable.filtro&& datosFT !== undefined){
                     filtro = datosFT
                   }else{
                     if(datosFiltrados.sp.length > 0){
@@ -315,7 +315,7 @@ module.exports = {
                 //Si las tendencias con valores tienen limite asociado chequeo si le corresponde y lo agrego
                 if(variable.limites.length > 0){
                   var arrLimites = formateado.map(async function (item) {
-                    const filtrado = variable.limites.filter(element => element.ini <= item.fecha && element.end > item.fecha)
+                    const filtrado = variable.limites.filter(element => element.codigo_producto.split(';').includes(item.codigo_producto))
                     const limiteDeTendencia = filtrado.length > 0 ? filtrado[0] : variable.limites[variable.limites.length -1]
                     item.limite_id = limiteDeTendencia.id
                     //Al tener alarma reviso el limite

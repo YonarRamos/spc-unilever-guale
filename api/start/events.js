@@ -2,7 +2,7 @@ const WebSocketHistoricosTendencia = require('../app/Jobs/WebSocketHistoricosTen
 const Adquisicion = require('../app/Jobs/Adquisicion');
 const Database = use('Database');
 
-initialCreate();
+//initialCreate();
 adquisicionRapida();
 //adquisicionLenta();
 

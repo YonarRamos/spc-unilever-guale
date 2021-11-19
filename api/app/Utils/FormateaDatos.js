@@ -127,11 +127,11 @@ var FormateaDatos = {
       try {
         var itemFiltrado = []
         //Orenamos el filtro por Timestamp
-        var filtroOrdenado = _.orderBy(filtro, 'Timestamap', 'DESC')
-        var sinFiltrarOrdenado = _.orderBy(sinFiltrar, 'Timestamap', 'DESC')
+        var filtroOrdenado = _.orderBy(filtro, ['Timestamp'], ['desc'])
+        var sinFiltrarOrdenado = _.orderBy(sinFiltrar, ['Timestamp'], ['desc'])
         for await(const item of filtroOrdenado){
           const aux = sinFiltrarOrdenado.filter(element => element.Timestamp <= item.Timestamp)
-          itemFiltrado.push(aux[aux.length-1])
+          itemFiltrado.push(aux[0])
         }
         resolve(itemFiltrado)
       } catch (error) {
