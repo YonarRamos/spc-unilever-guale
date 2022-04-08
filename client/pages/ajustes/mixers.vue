@@ -121,6 +121,7 @@ import ModalFormularioMixer from '@/components/public/Mixer/ModalFormularioMixer
 import ModalRelacionarProducto from '@/components/public/Mixer/ModalRelacionarProducto'
 
 export default {
+   middleware: "NOAUTH",
   components: {
     CartaExpandProductos,
     ModalFormularioMixer,

@@ -136,7 +136,6 @@ class TendenciaController {
           media_rango: 0,
           tendencia_id: tendencia.id
         };
-
     // Separo historicos de PV y SP
     const historicosPV = historicos
       .map(historico => {

@@ -4,6 +4,10 @@ const env = require('dotenv').config()
 module.exports = {
   mode: 'universal',
   env: env.parsed,
+   server: {
+     host: '0.0.0.0', // default: localhost
+    port: '3300'
+   },
   /*
    ** Headers of the page
    */

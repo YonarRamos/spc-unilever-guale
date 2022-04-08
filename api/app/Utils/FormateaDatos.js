@@ -108,7 +108,7 @@ var FormateaDatos = {
 
 
   // Ordenos datos segun la cantidad de alarmas que generaron
-  /* datos = datos.sort((a, b) => {
+   datos = datos.sort((a, b) => {
       if (a.cantidad_alarmas > b.cantidad_alarmas) {
         return 1;
       }
@@ -118,7 +118,7 @@ var FormateaDatos = {
       }
 
       return 0;
-     });*/
+     });
 
     return item;
   },

@@ -1,6 +1,7 @@
 'use strict';
 
 const User = use('App/Models/User');
+const Rol = use('App/Models/Rol');
 const Query = require('../../Utils/Query');
 
 class UserController {
@@ -11,11 +12,50 @@ class UserController {
   }
 
   async store({ request, response }) {
-    const data = request.only(['username', 'email', 'password']);
-    const user = await User.create(data);
+    try {
+      const data = request.only(['nombre', , 'apellido', 'email', 'password', 'rol_id']);
+      
+      const user = await User.create(data);
 
-    response.status(201).json(user);
+      response.status(201).json(user);
+    } catch (error) {
+      console.log(error)
+    }
+
   }
+  async login({ request, response, auth }) {
+    try {
+      const { email, password } = request.all();
+
+      const token = await auth.attempt(email, password)
+
+
+      return response.status(200).json({ message: 'logueado con exito!', token: token.token })
+    } catch (error) {
+      console.log(error.message)
+      var resCustom = ''
+      if (error.message.includes('Cannot verify user password')) {
+        return response.status(401).json({ message: 'Contraseña incorrecta' });
+      } else if (error.message.includes('Cannot find user')) {
+        return response.status(401).json({ message: 'Usuario no encontrado' });
+      } else {
+        return response.status(401).json({ message: 'Error al procesar la solicitud' });
+      }
+    }
+  }
+  async loginAutomatico({ auth, response }) {
+    try {
+      const user = await auth.getUser();
+      if (user) {
+        let data = { email: user.email, password: user.password }
+        return response.status(200).json(data)
+      }
+    } catch (error) {
+      console.log(error)
+      response.status(400).json({ menssage: 'Hubo un error al realizar la operación' })
+    }
+
+}
 
   async show({ request, response, params: { id } }) {
     const user = await User.findOrFail(id);
@@ -31,7 +71,7 @@ class UserController {
   }
 
   async update({ request, response, params: { id } }) {
-    const data = request.only(['username', 'email', 'password']);
+    const data = request.only(['nombre','apellido' ,'email', 'password']);
     const user = await User.find(id);
 
     if (!user) {
@@ -41,7 +81,8 @@ class UserController {
       });
       return;
     }
-    user.username = data.username || user.username;
+    user.nombre = data.nombre || user.nombre;
+    user.apellido = data.apellido || user.apellido;
     user.email = data.email || user.email;
     user.password = data.password || user.password;
     await user.save();
@@ -62,6 +103,11 @@ class UserController {
     await user.delete();
 
     response.status(200).json(user);
+  }
+  async rols({request , response,}){
+    let query = Rol.query();
+    const rol = await Query.builder(query, request);
+    response.status(200).json(rol);
   }
 }
 

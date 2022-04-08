@@ -22,8 +22,8 @@
           
           let datos = [];
           let tendencias = await Tendencia.query()
-            //.with('producto_actual')
-          // .with('limites')
+            .with('producto_actual')
+            .with('limites')
             .orderBy('tv', 'DESC')
             .fetch();
           tendencias = tendencias.toJSON();

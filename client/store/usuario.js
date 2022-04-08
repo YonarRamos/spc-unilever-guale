@@ -1,7 +1,6 @@
 import axios from '@/plugins/axios'
 
 export const state = () => ({
-  usuario: {},
   usuarios: {
     total: 20,
     perPage: 20,
@@ -22,7 +21,7 @@ export const mutations = {
     state.usuario = usuario
   },
   SET_USUARIOS(state, usuarios) {
-    state.usuarios = usuarios
+    state.usuario = usuarios
   },
   SET_PARAMS(state, params) {
     state.params = params
@@ -30,22 +29,24 @@ export const mutations = {
 }
 
 export const actions = {
-  async getAll(context) {
-    await axios
+  async getAll() {
+  
+      await axios
       .get('usuarios', {
         params: this.state.usuario.params
       })
       .then(response => {
-        this.commit('usuario/SET_USUARIOS', response.data)
+        this.commit('usuario/SET_USUARIOS', response.data.data)
+
       })
       .catch(error => {
         console.error(error)
-      })
+      }) 
   },
 
   async create(context, payload) {
     await axios
-      .post('usuarios', payload.content.usuario)
+      .post('users', payload.content.usuario)
       .then(response => {
         const usuario = response.data
         this.dispatch('usuario/getAll')
@@ -62,10 +63,9 @@ export const actions = {
 
   async update(context, payload) {
     await axios
-      .put(`usuarios/${payload.content.usuario.id}`, payload.content.usuario)
+      .put(`users/${payload.content.usuario.id}`, payload.content.usuario)
       .then(response => {
         const usuario = response.data
-        this.dispatch('usuario/getAll')
         this.commit('notification/ALERT_SUCCESS', usuario.nombre)
       })
       .catch(error => {
@@ -79,10 +79,9 @@ export const actions = {
 
   async delete(context, payload) {
     await axios
-      .delete(`usuarios/${payload.content.usuario.id}`)
+      .delete(`users/${payload.content.usuario.id}`)
       .then(response => {
         const usuario = response.data
-        this.dispatch('usuario/getAll')
         this.commit('notification/ALERT_SUCCESS', usuario.nombre)
       })
       .catch(error => {

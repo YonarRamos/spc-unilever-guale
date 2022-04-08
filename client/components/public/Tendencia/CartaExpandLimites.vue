@@ -11,18 +11,18 @@
         <v-data-table
           item-key="id"
           :headers="headers"
-          :items="limites.data"
+          :items="limites"
           :pagination.sync="pagination"
           :total-items="parseInt(limites.total)"
           :loading="loading"
           class="elevation-0 mt-3"
-        >
+        >{{items}}
           <template v-slot:items="props">
             <tr>
               <td class="text-xs-left">
                 <strong class="blue-grey--text ml-3">{{ props.item.codigo_producto }}</strong>
               </td>
-              <td class="text-xs-left">{{ props.item.created_at }}</td>
+              <!-- <td class="text-xs-left">{{ props.item.created_at}}</td> -->
               <td class="text-xs-left">{{ props.item.lh_1sigma }}</td>
               <td class="text-xs-left">{{ props.item.ll_1sigma }}</td>
               <td class="text-xs-left">{{ props.item.lh_2sigma }}</td>
@@ -99,7 +99,6 @@ export default {
           align: 'left',
           width: '10'
         },
-        { text: 'Fecha', value: 'fecha', align: 'left', width: '200' },
         { text: '+ 1σ', value: 'lh_1sigma', align: 'left', width: '100' },
         { text: '- 1σ', value: 'll_1sigma', align: 'left', width: '100' },
         { text: '+ 2σ', value: 'lh_2sigma', align: 'left', width: '100' },

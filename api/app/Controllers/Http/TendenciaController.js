@@ -36,6 +36,7 @@ class TendenciaController {
     let data = {
       tendencia: tendencia
     };
+  
     //console.log()
     if (!tendencia) {
       response.status(404).json({
@@ -62,10 +63,11 @@ class TendenciaController {
           moment().format('YYYY-MM-DD HH:mm:ss')
         ];
     tiempoReal = tiempoReal === 'true' ? true : false;
-    console.log("Adquiriendo datos")
-    const datos = await Adquisicion.tendencias(id, fechas[0], fechas[1])
+    const datos = await Adquisicion.tendencias(id, producto , fechas[0], fechas[1])
     if (tiempoReal) {
-      await Database.table('tendencias').update('tiempo_real', false);
+      await Database.table('tendencias')
+      .where('id' , id)
+      .update('tiempo_real', false);
 
       await Database.table('tendencias')
         .where('id', id)
@@ -77,27 +79,28 @@ class TendenciaController {
       .query()
       .where('tendencia_id', tendencia.id)
       .whereBetween('fecha', fechas);
-    let queryCodigoProducto = Historico
-      .query()
-      .where('tendencia_id', tendencia.id)
-      .whereBetween('fecha', fechas);
 
-    let queryUltimoCodigoProducto = Historico
-      .query()
-      .where('tendencia_id', tendencia.id)
-      .whereBetween('fecha', fechas); 
+     let queryCodigoProducto = Historico
+       .query()
+       .where('tendencia_id', tendencia.id)
+       .whereBetween('fecha', fechas);
 
-    if (producto) {
-      query.where('codigo_producto', producto);
-      queryUltimoCodigoProducto.where('codigo_producto', producto);
-    }
+     let queryUltimoCodigoProducto = Historico
+       .query()
+       .where('tendencia_id', tendencia.id)
+       .whereBetween('fecha', fechas); 
+
+     if (producto) {
+       query.where('codigo_producto', producto);
+       queryUltimoCodigoProducto.where('codigo_producto', producto);
+     }
     
     let historicos = datos//await query.orderBy('fecha', 'asc').fetch();
     
     let codigoProductoAgrupado = await queryCodigoProducto.select('codigo_producto').groupBy('codigo_producto').fetch();
     codigoProductoAgrupado = codigoProductoAgrupado.toJSON();
+    
     codigoProductoAgrupado = codigoProductoAgrupado.map(item => item.codigo_producto);
-
     let limite = []
     if(producto){
       limite = await Limite.query().where('tendencia_id', tendencia.id).where('codigo_producto', producto).fetch()
@@ -184,7 +187,6 @@ class TendenciaController {
     //console.log(historicosSP)
     let codigoProducto = await Producto.query().whereIn('codigo', codigoProductoAgrupado).fetch();
     codigoProducto = codigoProducto.toJSON();
-    
     historicosProductos = codigoProductoAgrupado
       .map(item => {
         const producto = codigoProducto.find(producto => producto.codigo.toString() === item.toString())
@@ -193,7 +195,6 @@ class TendenciaController {
           descripcion: producto ? producto.descripcion : ''
         }
       });
-
     // Consulto productos  
     let codigoProductoActual = await Producto.query().where('codigo', tendencia.codigo_producto_actual.trim()).first();
     let productoActual = {
@@ -321,7 +322,7 @@ class TendenciaController {
     let media = 0;
     let query = '';
     let historicos = [];
-    /*
+    
     if (codigoProducto) {
       query = `SELECT AVG(A.valor) as media, STDEV(A.valor) as std FROM (SELECT TOP ${cantidadHistoricos} fecha, valor FROM [WebStatisticalProcessControl].[dbo].[historicos] WHERE tag = '${
         tendencia.id
@@ -337,7 +338,6 @@ class TendenciaController {
       std = std ? std : 0;
       media = media ? media : 0;
     }
-    */
    if (codigoProducto) {
     query = `SELECT TOP ${cantidadHistoricos} * FROM [WebStaticalProcessControl].[dbo].[historicos] WHERE tendencia_id = '${
       tendencia.id
@@ -406,7 +406,6 @@ class TendenciaController {
 
   async indexLimites({ request, response, params: { id } }) {
     const tendencia = await Tendencia.find(id);
-
     if (!tendencia) {
       response.status(404).json({
         message: 'Tendencia no encontrada.',
@@ -415,9 +414,10 @@ class TendenciaController {
       return;
     }
 
-    let query = tendencia.limites().where('end', null);
-    var limites = await Query.builder(query, request);
-    response.status(200).json(limites);
+    let query = await Limite.query().where('tendencia_id', id).fetch();
+    query = query.toJSON()
+   // var limites = await Query.builder(query, request);
+    response.status(200).json(query);
   }
 }
 

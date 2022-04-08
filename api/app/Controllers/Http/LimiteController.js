@@ -10,7 +10,7 @@ class LimiteController {
   async index({ request, response }) {
     try{
     let { tendencia, productos, desde, hasta } = request.get();
-    tendencia = tendencia || 6;
+    tendencia = tendencia || null;
     productos = productos || [];
     hasta = hasta || moment().format('YYYY-MM-DD HH:mm:ss');
     desde =
@@ -55,11 +55,12 @@ class LimiteController {
       'lsl_rango',
       'media',
       'media_rango',
+      'ultimo',
       'codigo_producto',
       'tendencia_id'
     ]);
 
-    data.ini = moment().format('YYYY-MM-DD HH:mm:ss')
+    data.int1 = moment().format('YYYY-MM-DD HH:mm:ss')
     const limite = await Limite.create(data);
     response.status(201).json(limite);
   }catch(error){

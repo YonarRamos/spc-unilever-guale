@@ -21,8 +21,11 @@ Route.get('api/v1/', () => {
 });
 
 // Users
-Route.get('api/v1/users', 'UserController.index');
+Route.get('api/v1/usuarios', 'UserController.index');
 Route.get('api/v1/users/:id', 'UserController.show');
+Route.post('api/v1/login', 'UserController.login')
+Route.get('api/v1/rols', 'UserController.rols')
+Route.get('api/v1/loginAutomatico' , 'UserController.loginAutomatico')
 Route.post('api/v1/users', 'UserController.store').validator('User/StoreUser');
 Route.put('api/v1/users/:id', 'UserController.update').validator('User/UpdateUser');
 Route.delete('api/v1/users/:id', 'UserController.destroy');

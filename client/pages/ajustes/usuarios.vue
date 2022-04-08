@@ -5,16 +5,21 @@
       wrap
       align-center
       class="elevation-2 px-1 grey lighten-4"
-      :style="{borderRadius: '6px'}"
+      :style="{ borderRadius: '6px' }"
     >
       <v-flex>
         <div
-          :style="{float: 'right', display: 'flex', width: ($vuetify.breakpoint.sm || $vuetify.breakpoint.xs) ? '100%' : ''}"
+          :style="{
+            float: 'right',
+            display: 'flex',
+            width:
+              $vuetify.breakpoint.sm || $vuetify.breakpoint.xs ? '100%' : '',
+          }"
         >
           <v-btn
             dark
             small
-            :block="($vuetify.breakpoint.sm || $vuetify.breakpoint.xs)"
+            :block="$vuetify.breakpoint.sm || $vuetify.breakpoint.xs"
             color="success"
             class="mt-2"
             @click="createUsuario()"
@@ -31,14 +36,20 @@
           <v-btn v-show="!search" color="grey" icon flat @click="verBusqueda()">
             <v-icon>search</v-icon>
           </v-btn>
-          <v-btn v-show="search" color="grey" icon flat @click="limpiarBusqueda()">
+          <v-btn
+            v-show="search"
+            color="grey"
+            icon
+            flat
+            @click="limpiarBusqueda()"
+          >
             <v-icon>clear</v-icon>
           </v-btn>
         </div>
       </v-flex>
 
       <v-flex xs12 v-show="search">
-        <div :style="{display: 'flex'}">
+        <div :style="{ display: 'flex' }">
           <v-text-field
             v-model="searchText"
             label="Que estas buscando?"
@@ -58,23 +69,30 @@
         <v-data-table
           item-key="id"
           :headers="headers"
-          :items="usuarios.data"
+          :items="usuarios"
           :pagination.sync="pagination"
-          :total-items="parseInt(usuarios.total)"
+          :total-items="parseInt(usuarios)"
           :loading="loading"
           class="elevation-0 mb-1"
         >
           <template v-slot:items="props">
             <tr>
-              <td class="text-xs-left">
-                <strong class="blue-grey--text">{{ props.item.id }}</strong>
-              </td>
               <td class="text-xs-left">{{ props.item.nombre }}</td>
-              <td class="text-xs-left">{{ props.item.descripcion }}</td>
-              <td class="text-xs-left">{{ props.item.tipo.nombre }}</td>
+               <td class="text-xs-left">{{ props.item.apellido }}</td>
+              <td class="text-xs-left">{{ props.item.email }}</td>
               <td class="text-xs-right">
-                <v-icon class="mr-2" color="blue" @click="editarUsuario(props.item)">edit</v-icon>
-                <v-icon class="mr-2" color="pink" @click="eliminarUsuario(props.item)">delete</v-icon>
+                <v-icon
+                  class="mr-2"
+                  color="blue"
+                  @click="editarUsuario(props.item)"
+                  >edit</v-icon
+                >
+                <v-icon
+                  class="mr-2"
+                  color="pink"
+                  @click="eliminarUsuario(props.item)"
+                  >delete</v-icon
+                >
               </td>
             </tr>
           </template>
@@ -93,8 +111,9 @@
 import ModalFormularioUsuario from '@/components/public/Usuario/ModalFormularioUsuario'
 
 export default {
+  middleware: 'NOAUTH',
   components: {
-    ModalFormularioUsuario
+    ModalFormularioUsuario,
   },
 
   data() {
@@ -105,24 +124,24 @@ export default {
       pagination: {},
       operacion: 'create',
       valid: false,
-      usuario: {
-        nombre: '',
-        descripcion: ''
-      },
+
       headers: [
-        {
-          text: 'SKU',
-          align: 'left',
-          value: 'id'
-        },
         {
           text: 'Nombre',
           align: 'left',
-          value: 'nombre'
+          value : 'nombre'
         },
-        { text: 'Descripcion', value: 'descripcion' },
-        { text: '', value: '', sortable: false }
-      ]
+        {
+          text: 'Apellido',
+          align: 'left',
+          value: 'apellido',
+        },
+        {
+          text: 'Email',
+          align: 'left',
+          value: 'email',
+        },
+      ],
     }
   },
 
@@ -131,27 +150,30 @@ export default {
       handler() {
         this.getUsuarios()
       },
-      deep: true
-    }
+      deep: true,
+    },
   },
 
   computed: {
     usuarios() {
-      return this.$store.state.usuario.usuarios
+      return this.$store.state.usuario.usuario
     },
     params() {
       return this.$store.state.usuario.params
     },
     modalFormularioUsuario() {
       return this.$store.state.modal.modalFormularioUsuario
-    }
+    },
   },
 
   methods: {
     async createUsuario() {
       this.usuario = {
         nombre: '',
-        descripcion: ''
+        apellido: '',
+        email : '',
+        password : '',
+        rol_id: 1
       }
       this.operacion = 'create'
       this.$store.commit('modal/MODAL_FORMULARIO_USUARIO')
@@ -175,12 +197,12 @@ export default {
         descending: this.pagination.descending ? 'DESC' : 'ASC',
         where: this.searchText
           ? [['nombre', 'like', `%${this.searchText}%`]]
-          : []
+          : [],
       }
       this.$store.commit('usuario/SET_PARAMS', params)
       this.$store
         .dispatch('usuario/getAll')
-        .then(response => (this.loading = false))
+        .then((response) => (this.loading = false))
     },
     verBusqueda() {
       this.search = true
@@ -189,7 +211,7 @@ export default {
       this.search = false
       this.searchText = ''
       this.getUsuarios()
-    }
-  }
+    },
+  },
 }
 </script>

@@ -2,19 +2,21 @@
 
 const Alarma = use('App/Models/Alarma');
 const Redis = use('Redis');
+const moment = use('moment')
 
 var ReglasDatos = {
   async sobrepasaLimite(historico, limite) {
     let alarma = {
       tendencia_id: historico.tendencia_id,
       codigo_producto: historico.codigo_producto,
-      tipo: 1
+      tipo: 1,
+      fecha_creada : moment().format('YYYY-MM-DD HH:mm:ss')
     };
     let cantidadAlarmasSinRecocer = await Redis.get('alarmas_sin_reconocer');
 
-    if (!cantidadAlarmasSinRecocer) {
-      cantidadAlarmasSinRecocer = 0;
-    }
+     if (!cantidadAlarmasSinRecocer) {
+       cantidadAlarmasSinRecocer = 0;
+     }
 
     // Analizo limites superiores
     // Crear alarma en caso que supere el limite de especificacion

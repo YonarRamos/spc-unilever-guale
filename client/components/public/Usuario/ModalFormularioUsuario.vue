@@ -16,25 +16,7 @@
         >
           <v-container>
             <v-layout row wrap>
-              <v-flex xs12>
-                <v-text-field
-                  v-model="usuario.email"
-                  :counter="40"
-                  label="Email"
-                  prepend-inner-icon="alternate_email"
-                  required
-                ></v-text-field>
-              </v-flex>
-
-              <v-flex xs12>
-                <v-text-field
-                  v-model="usuario.username"
-                  :counter="40"
-                  label="Usuario"
-                  prepend-inner-icon="account_circle"
-                  required
-                ></v-text-field>
-              </v-flex>
+              
 
               <v-flex xs12>
                 <v-text-field
@@ -56,6 +38,15 @@
                 ></v-text-field>
               </v-flex>
 
+              <v-flex xs12>
+                <v-text-field
+                  v-model="usuario.email"
+                  :counter="40"
+                  label="Email"
+                  prepend-inner-icon="email"
+                  required
+                ></v-text-field>
+              </v-flex>
               <v-flex xs12>
                 <v-text-field
                   v-model="usuario.password"

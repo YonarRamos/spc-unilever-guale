@@ -21,10 +21,10 @@
               <strong class="blue-grey--text">{{ props.item.fecha_creada }}</strong>
             </td>
             <td class="text-xs-left">{{ props.item.descripcion }}</td>
-            <td class="text-xs-left">{{ props.item.tendencia }}</td>
+            <td class="text-xs-left">{{ props.item.tendencia.nombre }}</td>
             <td class="text-xs-left">{{ props.item.tipo }}</td>
             <td class="text-xs-left">{{ props.item.prioridad }}</td>
-            <td class="text-xs-left">{{ props.item.usuario }}</td>
+            <td class="text-xs-left">{{ props.item.usuario}}</td>
             <td class="text-xs-left">{{ props.item.detalle }}</td>
             <td class="text-xs-left">{{ props.item.fecha_reconocida }}</td>
             <td class="text-xs-left">{{ props.item.reconocida }}</td>
@@ -53,6 +53,7 @@
 import FiltroAlarma from '@/components/public/FiltroAlarma'
 
 export default {
+   middleware: "NOAUTH",
   components: {
     FiltroAlarma
   },

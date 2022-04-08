@@ -54,6 +54,7 @@ import GraficoHistograma from '@/components/public/GraficoHistograma'
 import PanelIndicadores from '@/components/public/PanelIndicadores'
 
 export default {
+   middleware: "NOAUTH",
   components: {
     FiltroTendencia,
     GraficoTendencia,

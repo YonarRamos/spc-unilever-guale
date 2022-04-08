@@ -40,7 +40,7 @@
           <v-list-tile-title>Cambiar contraseña</v-list-tile-title>
         </v-list-tile>
 
-        <v-list-tile>
+        <v-list-tile @click="SET_DESLOGIN()">
           <v-list-tile-action>
             <v-icon>exit_to_app</v-icon>
           </v-list-tile-action>
@@ -52,6 +52,7 @@
 </template>
 
 <script>
+import { mapMutations, mapState } from "vuex";
 export default {
   data() {
     return {
@@ -84,6 +85,7 @@ export default {
   },
 
   methods: {
+    ...mapMutations(["SET_DESLOGIN"]),
     handleFullScreen() {
       this.fullScreen = !this.fullScreen
       let doc = window.document

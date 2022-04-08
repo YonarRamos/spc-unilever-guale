@@ -101,6 +101,7 @@ import GraficoTv5 from '@/components/public/Tv/GraficoTv5'
 import GraficoTv6 from '@/components/public/Tv/GraficoTv6'
 
 export default {
+   middleware: "NOAUTH",
   components: {
     GraficoTv1,
     GraficoTv2,

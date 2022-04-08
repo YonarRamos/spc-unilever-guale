@@ -95,6 +95,7 @@
 import ModalFormularioDestinatario from '@/components/public/Destinatario/ModalFormularioDestinatario'
 
 export default {
+   middleware: "NOAUTH",
   components: {
     ModalFormularioDestinatario
   },

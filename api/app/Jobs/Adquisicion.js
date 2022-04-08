@@ -216,13 +216,18 @@ module.exports = {
     }
   },
 
-  async tendencias(id, desde, hasta) {
-    console.log(desde , hasta)
+  async tendencias(id, producto , desde, hasta) {
     try {
-      let historicos = await Historico.query().where('tendencia_id', id).whereBetween('fecha',[desde, hasta]).fetch()
-      historicos = historicos.toJSON()
-      console.log('soyyyyyyyyyyyyyyyyyyyyyyyyyy hisoteeeeeeeeeeeee',historicos)
-      return Promise.resolve(historicos);
+      if(producto){
+        let historicos = await Historico.query().where({tendencia_id : id , codigo_producto : producto}).whereBetween('fecha',[desde, hasta]).fetch()
+        historicos = historicos.toJSON()
+        return Promise.resolve(historicos);
+      }else{
+        let historicos = await Historico.query().where({tendencia_id : id}).whereBetween('fecha',[desde, hasta]).fetch()
+        historicos = historicos.toJSON()
+        return Promise.resolve(historicos);
+      }
+     
     } catch (error) {
       return Promise.reject(error);
     }
@@ -231,7 +236,7 @@ module.exports = {
   async tomaDatos(tipo){
     try {
       const fechaActual = await Database.connection('historian').raw('SELECT GETDATE() AS date');
-      //var winCC = new TomaDatos();
+      console.log(fechaActual)
       //Chequeo dentro de los limites si la tendencia asociada es de adquisicion
       var tendencias = await Tendencia.query().where('tiempo_real', tipo).with('mixer').with('sp').with('pv').with('codigo_producto').with('limites').with('filtro').fetch()
       tendencias = tendencias.toJSON()

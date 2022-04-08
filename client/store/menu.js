@@ -42,6 +42,12 @@ export const state = () => ({
           icon: 'storage',
           to: '/ajustes/productos',
           badge: 0
+        },
+        {
+          title: 'Usuario',
+          icon: 'account_circle',
+          to: '/ajustes/usuarios',
+          badge: 0
         }
       ]
     }
@@ -87,6 +93,12 @@ export const state = () => ({
       title: 'Productos',
       icon: 'storage',
       to: '/ajustes/productos',
+      badge: 0
+    },
+    {
+      title: 'Usuario',
+      icon: 'account_circle',
+      to: '/ajustes/usuarios',
       badge: 0
     }
   ]

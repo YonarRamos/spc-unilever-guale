@@ -36,9 +36,9 @@
               required
             ></v-text-field>
           </v-flex>
-          <v-flex xs2>
+          <!-- <v-flex xs2>
             <v-btn :loading="loadingLimite" color="blue" outline class="mt-2" dark block @click="completarLimte()">GENERAR</v-btn>
-          </v-flex>
+          </v-flex> -->
           <v-flex xs12>
             <v-form v-model="valid" class="mt-3 white">
               <v-container>

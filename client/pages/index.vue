@@ -8,6 +8,7 @@
 import axios from '@/plugins/axios'
 
 export default {
+  middleware: "NOAUTH",
   components: {},
 
   data() {

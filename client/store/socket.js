@@ -99,35 +99,36 @@ export const mutations = {
     state.actualizarTablaTendencias = !state.actualizarTablaTendencias
   },
   SOCKET(state, ws) {
+    console.log('aaaaaaaaaaaaaaaaaa' , state)
     ws.connect()
     const channel = ws.subscribe('socket')
 
-    channel.on('tendencias', async datos => {
-      if (datos) {
-        datos.map(async function (item) {
-          let payload = {
-            params: {
-              producto : item.codigo_producto_actual,
-              fechas: [
-                moment()
-                  .add(-180, 'days')
-                  .format('YYYY-MM-DD HH:mm:ss'),
-                moment().format('YYYY-MM-DD HH:mm:ss')
-              ]
-            }
-          }
-          await axios
-            .get(`tendencias/${item.tendencia}`, {
-              params: payload.params
-            })
-            .then(response => {
-              const str = JSON.stringify(response.data)
-              localStorage.setItem(`TV${item.tv}`, str)
-              state.detalleTendenciaTv1 = response.data
-            })
-        })
-      }
+    // channel.on('tendencias', async datos => {
+    //   if (datos) {
+    //     datos.map(async function (item) {
+    //       let payload = {
+    //         params: {
+    //           producto : item.codigo_producto_actual,
+    //           fechas: [
+    //             moment()
+    //               .add(-180, 'days')
+    //               .format('YYYY-MM-DD HH:mm:ss'),
+    //             moment().format('YYYY-MM-DD HH:mm:ss')
+    //           ]
+    //         }
+    //       }
+    //       await axios
+    //         .get(`tendencias/${item.tendencia}`, {
+    //           params: payload.params
+    //         })
+    //         .then(response => {
+    //           const str = JSON.stringify(response.data)
+    //           localStorage.setItem(`TV${item.tv}`, str)
+    //           state.detalleTendenciaTv1 = response.data
+    //         })
+    //     })
+    //   }
 
-    })
+    // })
   }
 }

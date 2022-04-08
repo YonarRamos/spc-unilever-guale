@@ -49,7 +49,7 @@
             :items="tendenciasItems"
           >{{tendenciasItems}}</v-combobox>
         </v-flex>
-        <!--
+
         <v-flex class="divider">
           <v-combobox
             label="Productos"
@@ -58,7 +58,7 @@
             v-model="productoSeleccionada"
             :items="productosItems"
           ></v-combobox>
-        </v-flex>-->
+        </v-flex>
       </v-layout>
     </v-flex>
 
@@ -177,8 +177,7 @@
         <span>Filtrar</span>
       </v-btn>
     </v-flex>
-
-    <v-flex xs12>
+    <!-- <v-flex xs12>
       <template v-for="(item, i) in historicosProductos">
         <v-btn
           :key="i"
@@ -188,11 +187,11 @@
           @click="getDetalleTendencia(item.codigo)"
         >
           <v-icon>storage</v-icon>
-          <span class="ml-3 mr-1">{{item.codigo ? item.codigo : 'SIN CODIGO'}}</span> - 
+          <span class="ml-3 mr-1">{{item.codigo ? item.codigo : 'SIN CODIGO'}}</span> -
           <span class="ml-1">{{item.descripcion ? item.descripcion : 'SIN DESCRIPCION'}}</span>
         </v-btn>
       </template>
-    </v-flex>
+    </v-flex> -->
   </v-layout>
 </template>
 
@@ -235,23 +234,23 @@ export default {
   },
 
   watch: {
-    async tecnologiasSeleccionada() {
-      this.mixersItems = []
-      this.tendenciasItems = []
-      this.productosItems = []
-      if (
-        this.tecnologiasSeleccionada.length === 0 ||
-        this.tecnologiasSeleccionada.length === this.tecnologiasItems.length
-      ) {
-        this.mixersItems = this.mixers
-        this.tendenciasItems = this.tendencias
-        this.productosItems = this.productos
-      } else {
-        await this.getMixersByTecnologias()
-        await this.getTendenciasByTecnologias()
-        // await this.getProductosByTecnologias()
-      }
-    },
+    // async tecnologiasSeleccionada() {
+    //   this.mixersItems = []
+    //   this.tendenciasItems = []
+    //   this.productosItems = []
+    //   if (
+    //     this.tecnologiasSeleccionada.length === 0 ||
+    //     this.tecnologiasSeleccionada.length === this.tecnologiasItems.length
+    //   ) {
+    //     this.mixersItems = this.mixers
+    //     this.tendenciasItems = this.tendencias
+    //     this.productosItems = this.productos
+    //   } else {
+    //     await this.getMixersByTecnologias()
+    //     await this.getTendenciasByTecnologias()
+    //     // await this.getProductosByTecnologias()
+    //   }
+    // },
     async mixersSeleccionada() {
       this.tendenciasItems = []
       this.productosItems = []
@@ -266,14 +265,14 @@ export default {
         await this.getProductosByMixers()
       }
     },
-    // async tendenciaSeleccionada() {
-    //   this.productosItems = []
-    //   if (this.tendenciaSeleccionada) {
-    //     this.productosItems = this.productos
-    //   } else {
-    //     await this.getProductosByTendencia()
-    //   }
-    // },
+      async tendenciaSeleccionada() {
+       this.productosItems = []
+       if (this.tendenciaSeleccionada) {
+          this.productosItems = this.productos
+        } else {
+          await this.getProductosByTendencia()
+        }
+      },
     detalleTendencia() {
       this.historicosProductos = this.$store.state.socket.detalleTendencia.historicosProductos
     }
@@ -316,9 +315,9 @@ export default {
       new Date()
     ]
     this.getTendencias()
-    this.getTecnologias()
+   // this.getTecnologias()
     this.getMixers()
-    // this.getProductos()
+     this.getProductos()
   },
 
   methods: {
@@ -374,26 +373,26 @@ export default {
       )
       this.loadingTendencias = false
     },
-    async getTecnologias() {
-      this.loadingTecnologias = true
+    // async getTecnologias() {
+    //   this.loadingTecnologias = true
 
-      const payload = {
-        params: {
-          select: ['nombre', 'id'],
-          paginate: false
-        }
-      }
+    //   const payload = {
+    //     params: {
+    //       select: ['nombre', 'id'],
+    //       paginate: false
+    //     }
+    //   }
 
-      await axios.get('tecnologias', payload).then(response => {
-        this.tecnologias = response.data.data.map(item => {
-          item.text = item.nombre
-          item.value = item.id
-          return item
-        })
-        this.tecnologiasItems = this.tecnologias
-        this.loadingTecnologias = false
-      })
-    },
+    //   await axios.get('tecnologias', payload).then(response => {
+    //     this.tecnologias = response.data.data.map(item => {
+    //       item.text = item.nombre
+    //       item.value = item.id
+    //       return item
+    //     })
+    //     this.tecnologiasItems = this.tecnologias
+    //     this.loadingTecnologias = false
+    //   })
+    //},
     async getMixers() {
       this.loadingMixers = true
 
@@ -414,29 +413,29 @@ export default {
         this.loadingMixers = false
       })
     },
-    async getMixersByTecnologias() {
-      this.loadingMixers = true
+    // async getMixersByTecnologias() {
+    //   this.loadingMixers = true
 
-      const tecnologiasId = this.tecnologiasSeleccionada.map(
-        tecnologia => tecnologia.id
-      )
+    //   const tecnologiasId = this.tecnologiasSeleccionada.map(
+    //     tecnologia => tecnologia.id
+    //   )
 
-      const payload = {
-        params: {
-          paginate: false,
-          whereIn: [['tecnologia_id', tecnologiasId]]
-        }
-      }
+    //   const payload = {
+    //     params: {
+    //       paginate: false,
+    //       whereIn: [['tecnologia_id', tecnologiasId]]
+    //     }
+    //   }
 
-      await axios.get('tecnologias_mixers', payload).then(response => {
-        const mixersId = response.data.data.map(item => item.mixer_id)
+    //   await axios.get('tecnologias_mixers', payload).then(response => {
+    //     const mixersId = response.data.data.map(item => item.mixer_id)
 
-        this.mixersItems = this.mixers.filter(mixer =>
-          mixersId.includes(mixer.id)
-        )
-        this.loadingMixers = false
-      })
-    },
+    //     this.mixersItems = this.mixers.filter(mixer =>
+    //       mixersId.includes(mixer.id)
+    //     )
+    //     this.loadingMixers = false
+    //   })
+    // },
     async getProductos() {
       this.loadingProductos = true
 
@@ -524,7 +523,7 @@ export default {
     },
     async getDetalleTendencia(producto) {
       this.loading = true
-      this.productoSeleccionada = producto ?  producto : null
+      //this.productoSele = this.productoSeleccionada.codigo ?  producto : null
 
       this.fechas = [
         moment(new Date(this.fechaDesde + ' ' + this.horaDesde)).format(
@@ -538,10 +537,9 @@ export default {
         params: {
           tiempoReal: this.tiempoReal,
           fechas: this.fechas,
-          producto: 1234567
+          producto: this.productoSeleccionada.codigo
         }
       }
-
       await axios
         .get(`tendencias/${this.tendenciaSeleccionada.id }`, payload)
         .then(response => {

@@ -2,18 +2,19 @@ import Vue from 'vue'
 import Router from 'vue-router'
 import { interopDefault } from './utils'
 
-const _7b45d812 = () => interopDefault(import('..\\pages\\ajustes\\index.vue' /* webpackChunkName: "pages_ajustes_index" */))
-const _f9f73310 = () => interopDefault(import('..\\pages\\alarmas.vue' /* webpackChunkName: "pages_alarmas" */))
-const _01af4112 = () => interopDefault(import('..\\pages\\pruebas.vue' /* webpackChunkName: "pages_pruebas" */))
-const _e2d2cf7a = () => interopDefault(import('..\\pages\\tendencias.vue' /* webpackChunkName: "pages_tendencias" */))
-const _fe52ca46 = () => interopDefault(import('..\\pages\\tv.vue' /* webpackChunkName: "pages_tv" */))
-const _681c09fa = () => interopDefault(import('..\\pages\\ajustes\\alarmas.vue' /* webpackChunkName: "pages_ajustes_alarmas" */))
-const _1f6a5b0c = () => interopDefault(import('..\\pages\\ajustes\\mixers.vue' /* webpackChunkName: "pages_ajustes_mixers" */))
-const _c5be245a = () => interopDefault(import('..\\pages\\ajustes\\productos.vue' /* webpackChunkName: "pages_ajustes_productos" */))
-const _212b28ea = () => interopDefault(import('..\\pages\\ajustes\\tecnologias.vue' /* webpackChunkName: "pages_ajustes_tecnologias" */))
-const _460fb3d8 = () => interopDefault(import('..\\pages\\ajustes\\tendencias.vue' /* webpackChunkName: "pages_ajustes_tendencias" */))
-const _4710a475 = () => interopDefault(import('..\\pages\\ajustes\\usuarios.vue' /* webpackChunkName: "pages_ajustes_usuarios" */))
-const _7b769cc7 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
+const _860798d8 = () => interopDefault(import('..\\pages\\ajustes\\index.vue' /* webpackChunkName: "pages_ajustes_index" */))
+const _97bdcd94 = () => interopDefault(import('..\\pages\\alarmas.vue' /* webpackChunkName: "pages_alarmas" */))
+const _82b6ebc8 = () => interopDefault(import('..\\pages\\login.vue' /* webpackChunkName: "pages_login" */))
+const _30451235 = () => interopDefault(import('..\\pages\\pruebas.vue' /* webpackChunkName: "pages_pruebas" */))
+const _6d89f676 = () => interopDefault(import('..\\pages\\tendencias.vue' /* webpackChunkName: "pages_tendencias" */))
+const _b6aead42 = () => interopDefault(import('..\\pages\\tv.vue' /* webpackChunkName: "pages_tv" */))
+const _797f7e05 = () => interopDefault(import('..\\pages\\ajustes\\alarmas.vue' /* webpackChunkName: "pages_ajustes_alarmas" */))
+const _35403190 = () => interopDefault(import('..\\pages\\ajustes\\mixers.vue' /* webpackChunkName: "pages_ajustes_mixers" */))
+const _1d59b855 = () => interopDefault(import('..\\pages\\ajustes\\productos.vue' /* webpackChunkName: "pages_ajustes_productos" */))
+const _765b5aec = () => interopDefault(import('..\\pages\\ajustes\\tecnologias.vue' /* webpackChunkName: "pages_ajustes_tecnologias" */))
+const _661f8cd4 = () => interopDefault(import('..\\pages\\ajustes\\tendencias.vue' /* webpackChunkName: "pages_ajustes_tendencias" */))
+const _4b3381b3 = () => interopDefault(import('..\\pages\\ajustes\\usuarios.vue' /* webpackChunkName: "pages_ajustes_usuarios" */))
+const _160631f6 = () => interopDefault(import('..\\pages\\index.vue' /* webpackChunkName: "pages_index" */))
 
 Vue.use(Router)
 
@@ -91,51 +92,55 @@ export function createRouter() {
 
     routes: [{
       path: "/ajustes",
-      component: _7b45d812,
+      component: _860798d8,
       name: "ajustes"
     }, {
       path: "/alarmas",
-      component: _f9f73310,
+      component: _97bdcd94,
       name: "alarmas"
     }, {
+      path: "/login",
+      component: _82b6ebc8,
+      name: "login"
+    }, {
       path: "/pruebas",
-      component: _01af4112,
+      component: _30451235,
       name: "pruebas"
     }, {
       path: "/tendencias",
-      component: _e2d2cf7a,
+      component: _6d89f676,
       name: "tendencias"
     }, {
       path: "/tv",
-      component: _fe52ca46,
+      component: _b6aead42,
       name: "tv"
     }, {
       path: "/ajustes/alarmas",
-      component: _681c09fa,
+      component: _797f7e05,
       name: "ajustes-alarmas"
     }, {
       path: "/ajustes/mixers",
-      component: _1f6a5b0c,
+      component: _35403190,
       name: "ajustes-mixers"
     }, {
       path: "/ajustes/productos",
-      component: _c5be245a,
+      component: _1d59b855,
       name: "ajustes-productos"
     }, {
       path: "/ajustes/tecnologias",
-      component: _212b28ea,
+      component: _765b5aec,
       name: "ajustes-tecnologias"
     }, {
       path: "/ajustes/tendencias",
-      component: _460fb3d8,
+      component: _661f8cd4,
       name: "ajustes-tendencias"
     }, {
       path: "/ajustes/usuarios",
-      component: _4710a475,
+      component: _4b3381b3,
       name: "ajustes-usuarios"
     }, {
       path: "/",
-      component: _7b769cc7,
+      component: _160631f6,
       name: "index"
     }],
 

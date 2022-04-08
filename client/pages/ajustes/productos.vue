@@ -94,6 +94,7 @@ import axios from '@/plugins/axios'
 import ModalFormularioProducto from '@/components/public/Producto/ModalFormularioProducto'
 
 export default {
+   middleware: "NOAUTH",
   components: {
     ModalFormularioProducto
   },
