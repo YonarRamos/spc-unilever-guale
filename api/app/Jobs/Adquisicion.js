@@ -12,6 +12,7 @@ const _ = require('lodash');
 const moment = require('moment');
 const Database = use('Database');
 const Ws = use('Ws');
+const WebSocketHistoricosTendencia = require('../Jobs/WebSocketHistoricosTendencia');
 
 module.exports = {
   async datos() {
@@ -84,8 +85,8 @@ module.exports = {
 
       // Recorro array y traigo historicos necesarios
       for (let fecha of arrayIteraciones) {
-        console.time('Adquisicio datos');
-        console.log(fecha.desde, fecha.hasta);
+        console.time('Adquisicion de datos');
+        console.log('desde:',fecha.desde, 'hast:', fecha.hasta);
 
         let historicosFiltradoTotal = [];
         for (const key in tendenciasAgrupadas) {
@@ -197,7 +198,6 @@ module.exports = {
 
         // Emito por socket a todos los usuarios
         try {
-          // console.log(datos);
           Ws.getChannel('socket')
             .topic('socket')
             .broadcastToAll('tendencias', datos);
@@ -216,10 +216,14 @@ module.exports = {
     }
   },
 
-  async tendencias(id, producto , desde, hasta) {
+  async tendencias(id, productos , desde, hasta) {
     try {
-      if(producto){
-        let historicos = await Historico.query().where({tendencia_id : id , codigo_producto : producto}).whereBetween('fecha',[desde, hasta]).fetch()
+      if(productos){
+        let historicos = await Historico.query()
+        .where('tendencia_id' , id)
+        .whereIn('codigo_producto', productos)
+        .whereBetween('fecha',[desde, hasta])
+        .fetch()
         historicos = historicos.toJSON()
         return Promise.resolve(historicos);
       }else{
@@ -236,13 +240,14 @@ module.exports = {
   async tomaDatos(tipo){
     try {
       const fechaActual = await Database.connection('historian').raw('SELECT GETDATE() AS date');
-      console.log(fechaActual)
+      console.log('Adquisicion fecha actual:', fechaActual/* moment(fechaActual[0].date).format('YYYY-MM-DD HH:mm:ss' )*/)
       //Chequeo dentro de los limites si la tendencia asociada es de adquisicion
       var tendencias = await Tendencia.query().where('tiempo_real', tipo).with('mixer').with('sp').with('pv').with('codigo_producto').with('limites').with('filtro').fetch()
       tendencias = tendencias.toJSON()
       //Agrupo por ultima actualizacion
       const tendenciasAgrupadas = _.groupBy(tendencias, 'ultima_actualizacion')
       //Genero las iteraciones de tiempo para trabajar los datos
+      let i = 0;
       for(const key in tendenciasAgrupadas){
         const iteraciones = await FechaAdquisicion.arrayIteraciones(key, moment(fechaActual[0].date).format('YYYY-MM-DD HH:mm:ss'))
         //Consulto al historian la info de las tendencias necesarias en el rango de fecha
@@ -250,24 +255,30 @@ module.exports = {
           const valuesAgrupados = await TomaDatos.getData(tendenciasAgrupadas[key], fecha.desde, fecha.hasta)   
           //Proceso los datos revisando si hay que filtrar
           for await(const variable of tendenciasAgrupadas[key]){
-          
+
             //Tomo los datos por cada tendencia
-            const datosSP = variable.sp ? valuesAgrupados[`${variable.sp.tag_name}`] : undefined
-            var datosPV = variable.pv ? valuesAgrupados[`${variable.pv.tag_name}`] : undefined
-            var datosCP = variable.tag_codigo_producto ? valuesAgrupados[`${variable.codigo_producto.tag_name}`] : undefined
+            var datosSP = variable.sp ? valuesAgrupados[`${variable.sp.tag_name}`] : []
+            datosSP ? datosSP : datosSP = [];
+
+            var datosPV = variable.pv ? valuesAgrupados[`${variable.pv.tag_name}`] : []
+            datosPV ? datosPV : datosPV = [];
+
+            var datosCP = variable.tag_codigo_producto ? valuesAgrupados[`${variable.codigo_producto.tag_name}`] : []
+            datosCP ? datosCP : datosCP = [];
+
             var datosFT = variable.tag_filtro ? valuesAgrupados[`${variable.filtro.tag_name}`] : []
+            datosFT ? datosFT : datosFT = [];
             //Chequeo que tenga algun PV, si la tendencia no tiene PV ni la muestro
-            if(datosPV !== undefined){
-              if(datosPV.length > 0){
                 var datosFiltrados = {tendencia_id: variable.id, tk: variable.mixer_id, sp: [], pv: [], cp: [], filtro: []}
                
                 var datosNoFiltrados = {sp: [], pv: [], cp: []}
-
+ 
                 //Separo los filtrados y no filtrados, Si hay algun no filtrado lo trabajo
-                if(variable.sp){variable.sp.filtrado == true ? datosFiltrados.sp = datosSP : datosNoFiltrados.sp = datosSP}
+                if(variable.sp) {variable.sp.filtrado == true ? datosFiltrados.sp = datosSP : datosNoFiltrados.sp = datosSP}
                 if(variable.pv) {variable.pv.filtrado == true ? datosFiltrados.pv = datosPV : datosNoFiltrados.pv = datosPV}
                 if(variable.codigo_producto){variable.codigo_producto.filtrado == true ? datosFiltrados.codigo_producto = datosCP : datosNoFiltrados.cp = datosCP}
-  
+
+                if( true/* Descomentar *//* datosFiltrados.pv.length > 0 || datosFiltrados.sp.length > 0 || datosFiltrados.cp.length > 0 || datosFiltrados.filtro.length > 0 */) {
                 //Si hay algun datos sin filtrar lo filtro
                 if(datosNoFiltrados.sp.length > 0){
                   var filtro = []
@@ -303,7 +314,7 @@ module.exports = {
                   
                 if(datosNoFiltrados.cp.length > 0){
                   var filtro = []
-                  if(variable.filtro&& datosFT !== undefined){
+                  if(variable.filtro && datosFT !== undefined){
                     filtro = datosFT
                   }else{
                     if(datosFiltrados.sp.length > 0){
@@ -316,61 +327,52 @@ module.exports = {
                     datosFiltrados.cp = await FormateaDatos.filtraDatos(datosNoFiltrados.cp, filtro)
                   }
                 }
+                //console.log('Flag 2')
                 const formateado = await FormateaDatos.FormateaDatos(datosFiltrados)
+                console.log('Data para formatear:::::::::::::', formateado)
                 //Si las tendencias con valores tienen limite asociado chequeo si le corresponde y lo agrego
                 if(variable.limites.length > 0){
                   var arrLimites = formateado.map(async function (item) {
                     const filtrado = variable.limites.filter(element => element.codigo_producto.split(';').includes(item.codigo_producto))
                     const limiteDeTendencia = filtrado.length > 0 ? filtrado[0] : variable.limites[variable.limites.length -1]
                     item.limite_id = limiteDeTendencia.id
+                    //console.log('Flag 2.1.1')
                     //Al tener alarma reviso el limite
                     const alarma = await ReglasDatos.sobrepasaLimite(item, limiteDeTendencia);
                     if(alarma){item.disparo_alarma = true}
                   })
                   await Promise.all(arrLimites)
-                  
                 }
+
                 // Guardo historicos en DB
-                await Historico.createMany(formateado);
-                await Database.table('tendencias').update({'ultima_actualizacion': fecha.hasta , 'codigo_producto_actual': formateado[formateado.length -1].codigo_producto}).where('id', variable.id);
-                if( tipo == true){
-                    
-                    // Formateo datos para emitir por socket
-                  /*let datos = await FormateaDatos.sockets(
-                    formateado,
-                    variable,
-                    fecha.desde,
-                    fecha.hasta
-                  );*/
+//Descomentar     //await Historico.createMany(formateado);
 
-                  const datos = {
-                    "tendencia": variable.id,
-                    "actualizacion": true,
-                    "codigo_producto_actual": formateado[formateado.length -1].codigo_producto,
-                    "tv": variable.tv
-                  }
+//Descomentar    //await Database.table('tendencias').update({'ultima_actualizacion': fecha.hasta , 'codigo_producto_actual': formateado[formateado.length -1].codigo_producto}).where('id', variable.id);
 
+                  const socketDataFormated =  await FormateaDatos.socketsDataFormater(formateado)
+                  console.log('socketDataFormated:', socketDataFormated)
                   // Emito por socket a todos los usuarios
                   try {
-                    // console.log(datos);
+                    //console.log('Datos:', datos);
                     Ws.getChannel('socket')
                       .topic('socket')
-                      .broadcastToAll('tendencias', datos);
+                      .broadcastToAll('tendencias', socketDataFormated);
                   } catch (error) {
-                    //console.log('No hay usuarios subcriptos al socket');
+                    console.log('No hay usuarios subcriptos al socket');
                   }
-                }
-              }
+                
+              console.log('Contador:', i+=1 )
             }else{
               await Database.table('tendencias').update('ultima_actualizacion', fecha.hasta).where('id', variable.id);
+              console.log('Flag 4 - ELSE...')
             }
 
           }
         }
       }
-
+      console.log('Llego al final')
     } catch (error) {
-      console.log(error)
+      console.error(error)
     }
   }
 };

@@ -1,16 +1,8 @@
 <template>
   <div class="box">
-    <div id="grafico_histograma"></div>
+    <div v-show="dataHistograma.length > 0" id="grafico_histograma"></div>
   </div>
 </template>
-
-<style scoped>
-#grafico_histograma {
-  width: 100%;
-  height: 60vh;
-}
-</style>
-
 
 <script>
 import moment from 'moment'
@@ -22,7 +14,24 @@ import jStat from 'jStat'
 export default {
   props: {
     tendencia: Object,
-    historicosPV: Array,
+    historicosByLimits: {
+      type: Object,
+      default() {
+            return {}
+        }
+    },
+    historicosPV: {
+      type: Array,
+      default() {
+            return []
+        }
+    },
+    limitsName: {
+      type: Array,
+      default() {
+        return []
+      }
+    },
     limite: Object,
     update: Boolean
   },
@@ -35,119 +44,131 @@ export default {
   },
 
   watch: {
-    historicosPV() {
-      if (this.tendencia) {
-        this.generarData()
-        this.graficar()
-      }
+    async update(){
+      await this.generarData()
+      this.graficar()
     },
-    update() {
-      if (this.tendencia) {
-        this.generarData()
-        this.graficar()
-      }
-    }
+/*     async limite(){
+      await this.generarData()
+      this.graficar()
+    },
+      tiempoReal(){
+      this.dataHistograma=[]
+    },
+    async dataPV() {
+      await this.generarData()
+      this.graficar()
+    }, */
   },
 
   computed: {
     minMaxPorLimite() {
       return this.$store.state.socket.minMaxPorLimite
+    },
+    indexLimit(){
+      return this.$store.state.tendencia.indexTendenciaLimite
+    },
+    tiempoReal(){
+      return this.$store.state.socket.tiempoReal
     }
   },
 
   methods: {
     graficar() {
-      if (!this.chart) {
+      if( this.dataHistograma.length > 0 ){
         this.chart = echarts.init(document.getElementById('grafico_histograma'))
-      }
+        
+        let option = {
+          title: {
+            text: 'Histograma',
+            //subtext: this.tendencia ? this.tendencia.descripcion : '',
+            x: 'center'
+          },
+          tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+              animation: false
+            }
+          },
+          // toolbox: {
+          //   feature: {
+          //     dataZoom: {
+          //       title: 'Zoom',
+          //       yAxisIndex: 'none'
+          //     },
+          //     restore: {
+          //       title: 'Restaurar'
+          //     },
+          //     saveAsImage: {
+          //       title: 'Descargar'
+          //     }
+          //   }
+          // },
+          grid: {
+            // left: '4%',
+            //  top: '10%',
+            // width: '94%',
+            bottom:'12%',
+            backgroundColor: '#e8e8e8',
+            show: true
+          },
+          xAxis: [
+            {
+              type: 'value',
+              scale: false,
+              axisLine: { onZero: true },
+              axisLine: {
+                lineStyle: {
+                  color: '#90979c'
+                }
+              }
+            }
+          ],
+          yAxis: [
+            {
+              type: 'category',
+              show: false,
+              axisLine: {
+                lineStyle: {
+                  color: '#90979c'
+                }
+              }
+            }
+          ],
+          series: [
+            {
+              name: 'Histograma',
+              type: 'bar',
+              symbolSize: 8,
+              hoverAnimation: false,
+              barWidth: '99.0%',
+              data: this.dataHistograma,
+              itemStyle: {
+                normal: {
+                  color: '#3398DB'
+                }
+              }
+            }
+          ]
+        }
 
-      let option = {
-        // title: {
-        //   text: this.tendencia.nombre,
-        //   subtext: this.tendencia.descripcion,
-        //   x: 'center'
-        // },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            animation: false
-          }
-        },
-        toolbox: {
-          feature: {
-            dataZoom: {
-              title: 'Zoom',
-              yAxisIndex: 'none'
-            },
-            restore: {
-              title: 'Restaurar'
-            },
-            saveAsImage: {
-              title: 'Descargar'
-            }
-          }
-        },
-        grid: {
-          left: '4%',
-          top: '20%',
-          width: '94%',
-          backgroundColor: '#e8e8e8',
-          show: true
-        },
-        xAxis: [
-          {
-            type: 'value',
-            scale: false,
-            axisLine: { onZero: true },
-            axisLine: {
-              lineStyle: {
-                color: '#90979c'
-              }
-            }
-          }
-        ],
-        yAxis: [
-          {
-            type: 'category',
-            show: false,
-            axisLine: {
-              lineStyle: {
-                color: '#90979c'
-              }
-            }
-          }
-        ],
-        series: [
-          {
-            name: 'Histograma',
-            type: 'bar',
-            symbolSize: 8,
-            hoverAnimation: false,
-            barWidth: '99.0%',
-            data: this.dataHistograma,
-            itemStyle: {
-              normal: {
-                color: '#3398DB'
-              }
-            }
-          }
-        ]
+        this.chart.setOption(option)
       }
-
-      this.chart.setOption(option)
     },
     generarData() {
-      if (this.historicosPV.length > 3) {
-        const mean = mathjs.mean(this.historicosPV.map(item => item.valor))
-        const stdev = mathjs.std(this.historicosPV.map(item => item.valor))
-
-        const minPV = Math.min(...this.historicosPV.map(item => item.valor))
-        const maxPV = Math.max(...this.historicosPV.map(item => item.valor))
+      if(this.historicosPV && this.historicosPV.length > 0){
+        let mean = []    
+        let stdev = [] 
+        mean = mathjs.mean(this.historicosPV.map(item => item.pv).filter(item => !isNaN(item)))
+        stdev = mathjs.std(this.historicosPV.map(item => item.pv).filter(item => !isNaN(item)))        
+        
+        const maxPV = Math.max(...this.historicosPV.map(item => item.pv))
+        const minPV = Math.min(...this.historicosPV.map(item => item.pv))
 
         let min = 0
         let max = 0
 
-        if (this.limite && !this.minMaxPorLimite) {
+        if (this.limite && this.limite.usl && this.limite.lsl) {
           max = this.limite.usl
           min = this.limite.lsl
         } else {
@@ -166,7 +187,7 @@ export default {
 
         for (let i = 0; i < numeroClase; i++) {
           const valoresRango = this.historicosPV.filter(item => {
-            if (item.valor >= rangoClase[0] && item.valor < rangoClase[1]) {
+            if (item.pv >= rangoClase[0] && item.pv < rangoClase[1]) {
               return true
             }
           })
@@ -192,3 +213,15 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.box{
+  padding: 10px 5px 5px 0;
+  width: 100%;
+  height: 63vh;
+}
+#grafico_histograma {
+  width: 100%;
+  height: 63vh;
+}
+</style>

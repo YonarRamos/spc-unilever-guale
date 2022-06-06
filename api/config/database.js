@@ -92,14 +92,16 @@ module.exports = {
   mssql: {
     client: 'mssql',
     connection: {
-      host: Env.get('DB_HOST', '192.168.1.252'),
+      host: Env.get('DB_HOST', '127.0.0.1'),
       port: Env.get('DB_PORT', '1433'),
       user: Env.get('DB_USER', 'sysa'),
       password: Env.get('DB_PASSWORD', 'Edsd5450'),
       database: Env.get('DB_DATABASE', 'WebStatisticalProcessControl'),
+      requestTimeout: 600000,// this part worked for me, 10 min timeout
       options: {
         useUTC: false
-      }
+      },
+      
     }
   },
 

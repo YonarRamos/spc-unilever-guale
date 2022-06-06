@@ -32,6 +32,9 @@ class Tendencia extends Model {
   productos() {
     return this.belongsTo('App/Models/Producto')
   }
+  producto_actual() {
+    return this.hasMany('App/Models/ProductoActual', 'codigo_producto_actual', 'codigo_producto')
+  }
   mixer() { 
     return this.belongsTo('App/Models/Mixer')
   }

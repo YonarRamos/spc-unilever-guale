@@ -69,7 +69,7 @@ export const actions = {
       .then(response => {
         const destinatario = response.data
         this.dispatch('destinatario/getAll')
-        this.commit('notification/ALERT_SUCCESS', destinatario.nombre)
+        this.commit('notification/ALERT_SUCCESS', `Registro ${destinatario.nombre} actualizado`)
       })
       .catch(error => {
         const _error =
@@ -86,7 +86,7 @@ export const actions = {
       .then(response => {
         const destinatario = response.data
         this.dispatch('destinatario/getAll')
-        this.commit('notification/ALERT_SUCCESS', destinatario.nombre)
+        this.commit('notification/ALERT_SUCCESS',  `Registro ${destinatario.nombre} eliminado`)
       })
       .catch(error => {
         const _error =

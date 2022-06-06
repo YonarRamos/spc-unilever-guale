@@ -22,8 +22,8 @@ class Limite extends Model {
     }
   }
 
-  tendencia() {
-    return this.hasMany('App/Models/Tendencia', 'id', 'tendencia_id')
+  tendencias() {
+    return this.hasMany('App/Models/Tendencia', 'tendencia_id', 'id')
   }
   historico() {
     return this.hasMany('App/Models/Historico', 'id', 'limite_id')

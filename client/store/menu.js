@@ -1,4 +1,5 @@
 export const state = () => ({
+  alarmasNoReconocidas:10,
   side: [
     {
       title: 'Control estadistico',
@@ -17,7 +18,7 @@ export const state = () => ({
           to: '/tv',
           badge: 0
         },
-        { title: 'Alarmas', icon: 'alarm', to: '/alarmas', badge: 0 }
+        { title: 'Destinatarios(Alarmas)', icon:'notifications_active', to: '/alarmas', badge: 0 }
       ]
     },
     {
@@ -32,8 +33,8 @@ export const state = () => ({
           badge: 0
         },
         {
-          title: 'Alarmas',
-          icon: 'alarm',
+          title: 'Destinatarios (Alarmas)',
+          icon: 'notifications_active',
           to: '/ajustes/alarmas',
           badge: 0
         },
@@ -44,7 +45,7 @@ export const state = () => ({
           badge: 0
         },
         {
-          title: 'Usuario',
+          title: 'Usuarios',
           icon: 'account_circle',
           to: '/ajustes/usuarios',
           badge: 0
@@ -58,15 +59,17 @@ export const state = () => ({
       title: 'Tendencias',
       icon: 'timeline',
       to: '/tendencias',
-      badge: 0
+      badge: 0,
+      show:false
     },
     {
       title: 'Tv online',
       icon: 'tv',
       to: '/tv',
-      badge: 0
+      badge: 0,
+      show:false 
     },
-    { title: 'alarmas', icon: 'alarms', to: '/alarmas', badge: 0 }
+    { title:'Alarmas', icon:'notifications_active', to:'/alarmas', badge:0 , show:false }
   ],
 
   tabs: [
@@ -77,12 +80,11 @@ export const state = () => ({
       badge: 0
     },
     {
-      title: 'Alarmas',
-      icon: 'alarm',
+      title: 'Destinatarios',
+      icon: 'notifications_active',
       to: '/ajustes/alarmas',
       badge: 0
     },
-    
     {
       title: 'Mixers',
       icon: 'data_usage',
@@ -101,7 +103,7 @@ export const state = () => ({
       to: '/ajustes/usuarios',
       badge: 0
     }
-  ]
+  ],
 })
 
 export const mutations = {
@@ -118,3 +120,4 @@ export const mutations = {
     state.itemsNav[0].badge = count
   }
 }
+

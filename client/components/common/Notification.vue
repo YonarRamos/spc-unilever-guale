@@ -6,7 +6,7 @@
     multi-line="multi-line"
     :timeout="timeout"
   >
-    {{ message }}
+    <h3>{{ message }}</h3>
     <v-btn color="white" flat @click="SET_NOTIFICATION()">Cerrar</v-btn>
   </v-snackbar>
 </template>

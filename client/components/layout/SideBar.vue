@@ -1,5 +1,5 @@
 <template>
-  <v-navigation-drawer :value="drawer" :clipped="clipped" @input="handlerOpen" fixed app>
+  <v-navigation-drawer absolute :value="drawer" :clipped="clipped" @input="handlerOpen" class="elevation-5" >
     <template v-for="(element, index) in side">
       <v-layout :key="(index + 1)" row align-center>
         <v-flex xs10>
@@ -9,7 +9,7 @@
           <v-icon>{{ element.icon }}</v-icon>
         </v-flex>
       </v-layout>
-      <v-list :key="(index + 1) * -1" style="margin-top: -20px;">
+      <v-list :key="(index + 1) * -1" style="margin-top: -10px;">
         <v-list-tile
           v-for="(item, i) in element.items"
           :key="i"
@@ -44,13 +44,15 @@ import { mapState, mapMutations } from 'vuex'
 export default {
   data() {
     return {
-      clipped: false
+      clipped: true
     }
   },
 
   computed: {
     ...mapState('menu', ['side']),
-    ...mapState('layout', ['drawer']),
+    drawer() {
+      return this.$store.state.layout.drawer
+    },
     drawerState: {
       get() {
         return this.drawer

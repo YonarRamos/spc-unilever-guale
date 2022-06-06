@@ -7,15 +7,13 @@ export const state = () => ({
 
 export const mutations = {
   ALERT_SUCCESS(state, message) {
-    state.message =
-      `Registro creado exitosamente: ${message}` ||
-      'Operacion realizada exitosamente!'
-    state.color = 'green'
+    state.message =`${message}` || 'Operación realizada exitosamente!'
+    state.color = 'success'
     state.notification = !state.notification
   },
   ALERT_ERROR(state, message) {
     state.message =
-      `Error al crear el registro: ${message}` || 'Error al crear el registro!'
+      `${message}` || 'Error al realizar la operación!'
     state.color = 'red'
     state.notification = !state.notification
   },

@@ -1,46 +1,56 @@
 <template>
-  <v-dialog v-model="dialog" :width="operacion == 'delete' ? 400 : 800">
+  <v-dialog persistent v-model="dialog" :width="operacion == 'delete' ? 550 : 800">
     <v-card>
       <v-card-title class="headline" :style="{displey: 'flex', justifyContent: 'space-between'}">
         <v-icon>dvr</v-icon>
         <div v-if="operacion === 'create'">AGREGAR LIMITE</div>
-        <div v-if="operacion === 'edit'">EDITAR LIMITE</div>
+        <div v-if="operacion === 'edit'"> EDITAR LIMITE</div>
         <div v-if="operacion === 'delete'">ELIMINAR LIMITE</div>
         <v-icon :style="{cursor: 'pointer'}" @click="dialog = false">close</v-icon>
       </v-card-title>
       <v-card-text>
         <v-layout row wrap v-if="operacion != 'delete'">
-          <v-flex xs4 px-3>
-            <v-text-field
-              v-model="cantidadHistoricos"
-              :counter="100"
-              label="Cantidad de historicos"
-              prepend-inner-icon="play_for_work"
-              required
-            ></v-text-field>
-          </v-flex>
-          <v-flex xs6 px-3>
-            <v-select
-              v-if="operacion === 'create'"
-              label="Productos"
-              prepend-icon="storage"
-              v-model="limite.codigo_producto"
-              :items="productos"
-            ></v-select>
-            <v-text-field
-              v-if="operacion === 'edit'"
-              v-model="limite.codigo_producto"
-              label="Productos"
-              prepend-icon="storage"
-              disabled
-              required
-            ></v-text-field>
-          </v-flex>
-          <!-- <v-flex xs2>
-            <v-btn :loading="loadingLimite" color="blue" outline class="mt-2" dark block @click="completarLimte()">GENERAR</v-btn>
-          </v-flex> -->
+          <div class="first__section__card">
+            <v-layout row wrap v-if="operacion != 'delete'">
+              <v-flex xs4 px-3>
+                <v-text-field
+                  label="Nombre"
+                  prepend-icon="edit"
+                  v-model="limite.nombre"
+                  required
+                ></v-text-field>
+              </v-flex>
+              <v-flex xs4 px-3>
+                <v-select
+                  v-if="operacion === 'create'"
+                  label="Productos"
+                  prepend-icon="storage"
+                  v-model="limite.codigo_producto"
+                  :items="productos"
+                ></v-select>
+                <v-text-field
+                  v-if="operacion === 'edit'"
+                  v-model="limite.codigo_producto"
+                  label="Productos"
+                  prepend-icon="storage"
+                  disabled
+                  required
+                ></v-text-field>
+              </v-flex>
+              <v-flex xs4 px-3>
+                <v-text-field
+                  v-model="cantidadHistoricos"
+                  :counter="100"
+                  label="Cantidad de historicos"
+                  prepend-inner-icon="play_for_work"
+                  required
+                ></v-text-field>
+              </v-flex>         
+            </v-layout>  
+          </div>
+
           <v-flex xs12>
-            <v-form v-model="valid" class="mt-3 white">
+            <v-form v-model="valid" class="mt-3">
               <v-container>
                 <v-layout row wrap>
                   <v-flex xs6>
@@ -167,15 +177,21 @@
             </v-form>
           </v-flex>
         </v-layout>
-        <v-container>
+        <v-container class="pa-0">
           <v-layout row v-if="operacion == 'delete'">
-            <v-flex>
-              <v-icon :style="{fontSize: '48px'}" color="orange">warning</v-icon>
-            </v-flex>
-            <v-flex>
+            <v-flex xs12>
+              
               <div
-                class="subheading grey--text ml-3"
-              >¿Seguro desea elinimar la limite: {{limite.codigo_producto}}?</div>
+                class="grey--text"
+                style="display:flex;justify-content:center;align-items:center;"
+              >
+              <v-icon :style="{fontSize: '36px', marginRight:'3px'}" color="orange">warning</v-icon>
+              <h3 class="mr-1">¿Seguro desea elinimar el limite: 
+                <strong style="text-transform:uppercase;color:red;font-size:18px;" >"{{limite.nombre}}"</strong>
+                ?
+              </h3> 
+              
+              </div>
             </v-flex>
           </v-layout>
         </v-container>
@@ -214,24 +230,27 @@ export default {
       type: Object,
       required: true
     },
-    limite: {
+    limiteProp: {
       type: Object,
       required: true,
-      default: {
-        lh_1sigma: 0,
-        ll_1sigma: 0,
-        lh_2sigma: 0,
-        ll_2sigma: 0,
-        lh_3sigma: 0,
-        ll_3sigma: 0,
-        usl: 0,
-        lsl: 0,
-        usl_rango: 0,
-        lsl_rango: 0,
-        media: 0,
-        media_rango: 0,
-        codigo_producto: null,
-        tendencia_id: null
+      default(){
+        return {
+          lh_1sigma: 0,
+          ll_1sigma: 0,
+          lh_2sigma: 0,
+          ll_2sigma: 0,
+          lh_3sigma: 0,
+          ll_3sigma: 0,
+          usl: 0,
+          lsl: 0,
+          usl_rango: 0,
+          lsl_rango: 0,
+          media: 0,
+          media_rango: 0,
+          codigo_producto: null,
+          tendencia_id: null,
+          nombre:null
+        }
       }
     },
     operacion: {
@@ -249,6 +268,7 @@ export default {
       cantidadHistoricos: 30,
       productoSeleccionado: null,
       productos: [],
+      limite:{},
       rules: {
         limite: [
           v => !!v || 'El campo es requerido',
@@ -270,7 +290,7 @@ export default {
   },
 
   mounted() {
-    this.limite = this.limite
+    this.limite =  JSON.parse(JSON.stringify(this.limiteProp))
     this.getCodigosProductos()
   },
 
@@ -356,3 +376,15 @@ export default {
   }
 }
 </script>
+
+<style>
+.first__section__card{
+ border: 1px solid #BDBDBD;
+ border-radius: 5px;
+ padding: 5px;
+ width: 100%;
+/*  -moz-box-shadow:    inset 0 0 2px #000000;
+ -webkit-box-shadow: inset 0 0 2px #000000;
+ box-shadow:         inset 0 0 2px #000000; */
+}
+</style>

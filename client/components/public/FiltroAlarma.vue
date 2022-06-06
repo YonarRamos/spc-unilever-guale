@@ -1,147 +1,204 @@
 <template>
-  <v-layout row wrap class="filtro white">
-    <v-flex class="divider">
+<section class="main__wrapper">
+  <v-layout row wrap class="filtro " >
+    <v-flex xs3 >
       <v-combobox
         label="Tendencia"
-        prepend-icon="timeline"
+        prepend-inner-icon="timeline"
         :loading="loadingTendencias"
         v-model="tendenciaSeleccionada"
-        :items="tendencias"
-        style="width: 500px"
-      ></v-combobox>
+        :items="tendencias"      
+        box
+        hide-details
+        background-color="white"
+        class="mx-2"
+          ></v-combobox>          
     </v-flex>
 
-    <v-flex>
-      <v-menu
-        ref="menuFechaDesde"
-        v-model="menuFechaDesde"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        :return-value.sync="fechaDesde"
-        lazy
-        transition="scale-transition"
-        offset-y
-        full-width
-        width="140px"
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field
-            v-model="fechaDesde"
-            label="Desde"
-            prepend-icon="event"
-            readonly
-            v-on="on"
-            :style="{width: '140px'}"
-          ></v-text-field>
-        </template>
-        <v-date-picker v-model="fechaDesde" no-title scrollable>
-          <v-spacer></v-spacer>
-          <v-btn flat color="primary" @click="menuFechaDesde = false">Cancelar</v-btn>
-          <v-btn flat color="primary" @click="$refs.menuFechaDesde.save(fechaDesde)">OK</v-btn>
-        </v-date-picker>
-      </v-menu>
-    </v-flex>
+    <v-flex xs4 class="mr-3" style="display:flex;">
+      <div class="frame mr-1">
+        <small>Desde:</small>
+        <div style="display:flex;">
+          <v-menu
+            ref="menuFechaDesde"
+            v-model="menuFechaDesde"
+            :close-on-content-click="false"
+            :nudge-right="40"
+            :return-value.sync="fechaDesde"
+            lazy
+            transition="scale-transition"
+            offset-y
+            dense
+            full-width
+            class="input__fecha my-0 py-0"
+          >
+            <template v-slot:activator="{ on }" class="px-0">
+              <v-text-field
+                v-model="fechaDesde"
+                label="Desde"
+                prepend-icon="event"
+                dense
+                readonly
+                solo
+                flat
+                v-on="on"
+                hide-details
+                style="width:150px;"
+              ></v-text-field>
+            </template>
+              <v-date-picker v-model="fechaDesde" no-title scrollable>
+                <v-spacer></v-spacer>
+                <v-btn flat color="primary" @click="menuFechaDesde = false">Cancelar</v-btn>
+                <v-btn flat color="primary" @click="$refs.menuFechaDesde.save(fechaDesde)">OK</v-btn>
+              </v-date-picker>
+            </v-menu> 
+            <v-divider vertical class="divider__style"/>
+            <!-- Hora desde-->   
+            <v-menu
+              ref="menuHoraDesde"
+              v-model="menuHoraDesde"
+              :close-on-content-click="false"
+              :nudge-right="40"
+              :return-value.sync="horaDesde"
+              lazy
+              transition="scale-transition"
+              offset-y
+              full-width
+            >
+              <template v-slot:activator="{ on }">
+                <v-text-field
+                  v-model="horaDesde"
+                  label="Desde"
+                  prepend-icon="alarm"
+                  readonly
+                  solo
+                  flat
+                  hide-details
+                  v-on="on"
+                  style="width:130px;"
+                ></v-text-field>
+              </template>
+              <v-time-picker v-model="horaDesde" no-title scrollable>
+                <v-spacer></v-spacer>
+                <v-btn flat color="primary" @click="menuHoraDesde = false">Cancelar</v-btn>
+                <v-btn flat color="primary" @click="$refs.menuHoraDesde.save(horaDesde)">OK</v-btn>
+              </v-time-picker>
+            </v-menu>
+          </div>
+      </div>
 
-    <v-flex class="divider">
-      <v-menu
-        ref="menuHoraDesde"
-        v-model="menuHoraDesde"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        :return-value.sync="horaDesde"
-        lazy
-        transition="scale-transition"
-        offset-y
-        full-width
-        width="140px"
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field
-            v-model="horaDesde"
-            label="Desde"
-            prepend-icon="alarm"
-            readonly
-            v-on="on"
-            :style="{width: '140px'}"
-          ></v-text-field>
-        </template>
-        <v-time-picker v-model="horaDesde" no-title scrollable>
-          <v-spacer></v-spacer>
-          <v-btn flat color="primary" @click="menuFechaDesde = false">Cancelar</v-btn>
-          <v-btn flat color="primary" @click="$refs.menuFechaDesde.save(horaDesde)">OK</v-btn>
-        </v-time-picker>
-      </v-menu>
-    </v-flex>
+      <div class="frame">
+        <small>Hasta:</small>
+        <div style="display:flex;">
+          <v-menu
+            ref="menuFechaHasta"
+            v-model="menuFechaHasta"
+            :close-on-content-click="false"
+            :nudge-right="40"
+            :return-value.sync="fechaHasta"
+            lazy
+            transition="scale-transition"
+            offset-y
+            full-width
+          >
+            <template v-slot:activator="{ on }">
+              <v-text-field
+                v-model="fechaHasta"
+                label="Hasta"
+                prepend-icon="event"
+                readonly
+                hide-details
+                solo
+                flat
+                v-on="on"
+                style="width:140px;"
+              ></v-text-field>
+            </template>
+            <v-date-picker v-model="fechaHasta" no-title scrollable>
+              <v-spacer></v-spacer>
+              <v-btn flat color="primary" @click="menuFechaHasta = false">Cancelar</v-btn>
+              <v-btn flat color="primary" @click="$refs.menuFechaHasta.save(fechaHasta)">OK</v-btn>
+            </v-date-picker>
+          </v-menu>
+          
+          <v-divider vertical class="divider__style"/>
 
-    <v-flex>
-      <v-menu
-        ref="menuFechaHasta"
-        v-model="menuFechaHasta"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        :return-value.sync="fechaHasta"
-        lazy
-        transition="scale-transition"
-        offset-y
-        full-width
-        width="140px"
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field
-            v-model="fechaHasta"
-            label="Hasta"
-            prepend-icon="event"
-            readonly
-            v-on="on"
-            :style="{width: '140px'}"
-          ></v-text-field>
-        </template>
-        <v-date-picker v-model="fechaHasta" no-title scrollable>
-          <v-spacer></v-spacer>
-          <v-btn flat color="primary" @click="menuFechaHasta = false">Cancelar</v-btn>
-          <v-btn flat color="primary" @click="$refs.menuFechaHasta.save(fechaHasta)">OK</v-btn>
-        </v-date-picker>
-      </v-menu>
+          <!-- Hora hasta -->
+          <v-menu
+            ref="menuHoraHasta"
+            v-model="menuHoraHasta"
+            :close-on-content-click="false"
+            :nudge-right="40"
+            :return-value.sync="horaHasta"
+            lazy
+            transition="scale-transition"
+            offset-y
+            full-width
+            width="130px"
+          >
+            <template v-slot:activator="{ on }">
+              <v-text-field
+                v-model="horaHasta"
+                label="Hasta"
+                prepend-icon="alarm"
+                readonly
+                solo
+                flat
+                hide-details
+                v-on="on"
+                style="width:140px;"
+              ></v-text-field>
+            </template>
+            <v-time-picker v-model="horaHasta" no-title scrollable>
+              <v-spacer></v-spacer>
+              <v-btn flat color="primary" @click="menuHoraHasta = false">Cancelar</v-btn>
+              <v-btn flat color="primary" @click="$refs.menuHoraHasta.save(horaHasta)">OK</v-btn>
+            </v-time-picker>
+          </v-menu>
+        </div>
+      </div>
     </v-flex>
-
-    <v-flex class="divider">
-      <v-menu
-        ref="menuHoraHasta"
-        v-model="menuHoraHasta"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        :return-value.sync="horaHasta"
-        lazy
-        transition="scale-transition"
-        offset-y
-        full-width
-        width="140px"
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field
-            v-model="horaHasta"
-            label="Hasta"
-            prepend-icon="alarm"
-            readonly
-            v-on="on"
-            :style="{width: '140px'}"
-          ></v-text-field>
-        </template>
-        <v-time-picker v-model="horaHasta" no-title scrollable>
-          <v-spacer></v-spacer>
-          <v-btn flat color="primary" @click="menuFechaHasta = false">Cancelar</v-btn>
-          <v-btn flat color="primary" @click="$refs.menuFechaHasta.save(horaHasta)">OK</v-btn>
-        </v-time-picker>
-      </v-menu>
-    </v-flex>
-
-    <v-flex>
-      <v-btn dark class="mt-2" :loading="loading" block @click="getAlarmas()">
-        <v-icon>filter_list</v-icon>
-        <span>Filtrar</span>
-      </v-btn>
+    <v-spacer></v-spacer>
+    <v-flex xs4>
+      <div class="frame__reconocidas">
+        <small>Mostrar:</small>
+        <v-radio-group :column="false" v-model="mostrar" class="my-0">
+          <v-radio
+            v-for="opt of radioOptions"
+            :key="opt.value"
+            :label="opt.label"
+            :value="opt.value"
+          ></v-radio>
+        </v-radio-group>       
+      </div>
     </v-flex>
   </v-layout>
+  <v-layout>
+    <v-spacer></v-spacer>
+    <v-flex xs2>
+      <section style="display:flex;justify-content:flex-end;">
+        <div>
+          <v-btn
+            outline 
+            fab
+            icon
+            small
+            color="grey"
+            @click="clearTendencia"
+          >
+            <v-icon style="margin-top:21px;">delete</v-icon>
+          </v-btn>
+        </div>
+
+        <v-btn class="btn__filtrar" dark :loading="loading" @click="filterBy()">
+          <v-icon>filter_list</v-icon>
+          <span>Filtrar</span>
+        </v-btn>   
+      </section>     
+    </v-flex>
+  </v-layout>
+</section>
+
 </template>
 
 <script>
@@ -157,43 +214,58 @@ export default {
       menuHoraHasta: false,
       fechaDesde: null,
       fechaHasta: null,
-      horaDesde: '06:00:00',
-      horaHasta: '06:00:00',
-      fechas: [],
+      horaDesde: '00:00:00',
+      horaHasta: '00:00:00',
       tendencias: [],
       tendenciaSeleccionada: null,
       dosificacion: false,
       loadingTendencias: false,
       loading: false,
-      searchText: ''
+      searchText: '',
+      mostrar:0,
+      radioOptions:[
+        { label:"Todas", value:null },
+        { label:"No reconocidas", value:0 },
+        { label:"Reconocidas", value:1 }
+      ]
     }
   },
 
   computed: {
     params() {
       return this.$store.state.alarma.params
+    },
+    filterParams(){
+      return {
+        desde:this.desde,
+        hasta:this.hasta,
+        mostrar:this.mostrar,
+        tendencia_id:this.tendenciaSeleccionada ? this.tendenciaSeleccionada.id : null
+      }
+    },
+    desde(){
+      if(this.fechaDesde){
+        return new Date(`${this.fechaDesde} ${this.horaDesde}`)
+      } else {
+        return null
+      }
+    },
+    hasta(){
+      if(this.fechaHasta){
+        return new Date(`${this.fechaHasta} ${this.horaHasta}`)
+      } else {
+        return null
+      }
     }
   },
-
   mounted() {
-    this.fechaDesde = moment()
-      .add(-7, 'days')
-      .format('YYYY-MM-DD')
-
-    this.fechaHasta = moment().format('YYYY-MM-DD')
-
-    this.fechas = [
-      new Date(
-        moment()
-          .add(-7, 'days')
-          .format('YYYY-MM-DD HH:mm:ss')
-      ),
-      new Date()
-    ]
     this.getTendencias()
   },
 
   methods: {
+    filterBy(){
+      this.$emit('filter', this.filterParams)
+    },
     async getTendencias() {
       this.loadingTendencias = true
 
@@ -213,26 +285,20 @@ export default {
         this.loadingTendencias = false
       })
     },
-    async getAlarmas() {
-      this.loading = true
-      let params = this.params
-      params.where = [['descripcion', 'like', `%${this.searchText}%`]]
-
-      if (this.tendenciaSeleccionada) {
-        params.where.push(['tendencia_id', '=', this.tendenciaSeleccionada.id])
-      }
-      params.whereBetween = [
-        [
-          'fecha_creada',
-          `${this.fechaDesde} ${this.horaDesde}`,
-          `${this.fechaHasta} ${this.horaHasta}`
-        ]
-      ]
-
-      this.$store.commit('alarma/SET_PARAMS', params)
-      this.$store
-        .dispatch('alarma/getAll')
-        .then(response => (this.loading = false))
+    clearTendencia(){
+      this.fechaDesde = null
+      this.fechaHasta = null
+      this.tendenciaSeleccionada = null
+      this.horaDesde = ''
+      this.horaHasta = ''
+      this.mostrar = null
+      this.$emit('filter', this.filterParams)
+    },
+    showClearBtn(){
+        if(this.tendenciaSeleccionada){
+          return true
+        }
+        return false        
     }
   }
 }
@@ -250,7 +316,49 @@ export default {
   line-height: 1.5;
   font-size: 14px;
 }
-/* .divider {
-  border-right: 1px solid rgb(230, 230, 230);
-} */
+.input__fecha{
+  height: 35px!important;
+  max-width: 50px;
+}
+.frame{
+  padding-left: 15px;
+  border: solid 1px gray;
+  border-radius: 5px;
+  height: 55px;
+  width: 260px;
+  background: white;
+}
+.frame__reconocidas{
+  padding-left: 15px;
+  border: solid 1px gray;
+  border-radius: 5px;
+  height: 55px;
+  width: 420px;
+  background: white;
+}
+.main__wrapper{
+  display: flex;
+  align-items: center;
+  height: 6rem;
+  background: rgb(238, 240, 255);
+  border: solid 1px gray;
+}
+.divider__style{
+  height: 5px;
+  margin-right: 10px;
+}
+</style>
+<style>
+.frame div {
+  height: 30px!important;
+  min-height: 0px!important;
+  margin: 0;
+  background: white;
+}
+.frame div .v-input__prepend-outer{
+  margin-top: 0!important;
+}
+.btn__filtrar{
+  border-radius: 5px;
+}
 </style>

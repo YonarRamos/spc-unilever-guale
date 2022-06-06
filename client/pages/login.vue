@@ -64,10 +64,12 @@
 <script>
 import { mapMutations } from 'vuex'
 import axios from '../plugins/axios'
+import Cookies from 'js-cookie'
 export default {
   layout: 'login',
   middleware: 'AUTH',
   data: () => ({
+    valid:false,
     btnIngresar: false,
     dialog: false,
     email: '',
@@ -82,12 +84,15 @@ export default {
       await axios
         .post('login', { email: this.email, password: this.password })
         .then((res) => {
+          console.log('LOGIN DATA:',  res)
+          Cookies.set('user', `${res.data.user.nombre} ${res.data.user.apellido}` )
+          Cookies.set('user_id', res.data.user.id )
           let token = res.data.token
           this.SET_AUTH(token)
         })
         .catch((error) => {
           console.log(error)
-          this.alertError = error.response.data
+          this.alertError = error.response.data.message
           this.dialog = true
         })
     },
@@ -105,7 +110,7 @@ export default {
          })
      },
   },
-   created() {
+   mounted() {
      this.conexion()
    },
 }

@@ -6,7 +6,7 @@ var FechaAdquisicion = {
   async arrayIteraciones(desde, hasta) {
     // Saco 3 minutos para compensar hora con la del servidor
 
-    desde = moment(desde);
+    desde = moment("2021-12-01 15:29:19");
     hasta = moment(hasta);
 
     let i = 0;

@@ -18,17 +18,18 @@ void (function updateModules() {
   // Enforce store modules
   store.modules = store.modules || {}
 
-  resolveStoreModules(require('..\\store\\modal.js'), 'modal.js')
   resolveStoreModules(require('..\\store\\alarma.js'), 'alarma.js')
+  resolveStoreModules(require('..\\store\\config.js'), 'config.js')
   resolveStoreModules(require('..\\store\\destinatario.js'), 'destinatario.js')
   resolveStoreModules(require('..\\store\\layout.js'), 'layout.js')
   resolveStoreModules(require('..\\store\\limite.js'), 'limite.js')
   resolveStoreModules(require('..\\store\\menu.js'), 'menu.js')
   resolveStoreModules(require('..\\store\\mixer.js'), 'mixer.js')
-  resolveStoreModules(require('..\\store\\config.js'), 'config.js')
+  resolveStoreModules(require('..\\store\\modal.js'), 'modal.js')
   resolveStoreModules(require('..\\store\\notification.js'), 'notification.js')
   resolveStoreModules(require('..\\store\\producto.js'), 'producto.js')
   resolveStoreModules(require('..\\store\\socket.js'), 'socket.js')
+  resolveStoreModules(require('..\\store\\socketTv.js'), 'socketTv.js')
   resolveStoreModules(require('..\\store\\tag.js'), 'tag.js')
   resolveStoreModules(require('..\\store\\tecnologia.js'), 'tecnologia.js')
   resolveStoreModules(require('..\\store\\tendencia.js'), 'tendencia.js')
@@ -39,18 +40,19 @@ void (function updateModules() {
   if (process.client && module.hot) {
     // Whenever any Vuex module is updated...
     module.hot.accept([
-      '..\\store\\modal.js',
       '..\\store\\alarma.js',
+      '..\\store\\config.js',
       '..\\store\\destinatario.js',
       '..\\store\\index.js',
       '..\\store\\layout.js',
       '..\\store\\limite.js',
       '..\\store\\menu.js',
       '..\\store\\mixer.js',
-      '..\\store\\config.js',
+      '..\\store\\modal.js',
       '..\\store\\notification.js',
       '..\\store\\producto.js',
       '..\\store\\socket.js',
+      '..\\store\\socketTv.js',
       '..\\store\\tag.js',
       '..\\store\\tecnologia.js',
       '..\\store\\tendencia.js',

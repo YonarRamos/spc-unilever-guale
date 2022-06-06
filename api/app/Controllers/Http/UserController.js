@@ -26,11 +26,13 @@ class UserController {
   async login({ request, response, auth }) {
     try {
       const { email, password } = request.all();
-
       const token = await auth.attempt(email, password)
-
-
-      return response.status(200).json({ message: 'logueado con exito!', token: token.token })
+      let user = await User.findBy('email', email)
+      user = user.toJSON()
+      delete user.password
+      console.log(user)
+      
+      return response.status(200).json({ message: 'logueado con exito!', token: token.token, user})
     } catch (error) {
       console.log(error.message)
       var resCustom = ''

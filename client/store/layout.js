@@ -1,7 +1,7 @@
 export const state = () => ({
   drawer: false,
   themeAppDark: false,
-  colorNavBar: 'blue',
+  colorNavBar: 'indigo',
   scrollPosition: null
 })
 

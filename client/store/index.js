@@ -25,6 +25,8 @@ export const mutations = {
       async SET_DESLOGIN(state) {  
         state.auth = false;
         Cookies.remove('token') 
+        Cookies.remove('user') 
+        Cookies.remove('user_id') 
         this.$router.push('/login')
       },
      

@@ -6,7 +6,11 @@ const ServiceProducto = require('../../Services/Producto');
 
 class ProductoController {
   async index({ request, response }) {
+    let { codigo } = request.only(['codigo'])
     let query = Producto.query();
+    if(codigo){
+      query.where('codigo', codigo)
+    }
     const productos = await Query.builder(query, request);
     response.status(200).json(productos);
   }

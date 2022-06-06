@@ -1,6 +1,6 @@
 <template>
   <v-toolbar :color="colorNavBar" :clipped-left="clipped" dense dark fixed app>
-    <v-toolbar-side-icon @click.stop="$store.commit('layout/SET_DRAWER')"/>
+    <v-toolbar-side-icon @click="$store.commit('layout/SET_DRAWER')"/>
 
     <v-toolbar-items
       class="hidden-sm-and-down"
@@ -11,25 +11,34 @@
       exact
     >
       <v-btn flat :to="item.to">
-        <v-icon dark>{{item.icon}}</v-icon>
-        <span class="ml-2" style="font-size: 12px;">{{item.title}}</span>
-        <v-icon
-          v-if="item.badge > 0"
-          class="red"
-          style="font-size: 16px; position: relative; top: -10px; right: -10px; border-radius: 20%; padding: 2px;"
-        >notifications</v-icon>
+        <span class="mr-2" style="font-size: 12px;">{{item.title}}</span>
+        <v-badge
+          v-show="item.title == 'Alarmas' &&  noReconocidas > 0 "
+          color="red"
+        >
+          <template v-slot:badge>
+            <small>{{noReconocidas > 99 ? '+99' : noReconocidas}}</small> <!-- {{noReconocidas}} -->
+          </template>
+          <v-icon small color="white">{{item.icon}}</v-icon>
+        </v-badge>
       </v-btn>
       <v-divider></v-divider>
     </v-toolbar-items>
 
     <v-spacer/>
+    <v-chip selected color="indigo darken-4" text-color="white">
+      <v-avatar>
+        <v-icon>account_circle</v-icon>
+      </v-avatar>
+      {{userName}}
+    </v-chip>
     <v-btn flat icon @click="handleFullScreen()">
       <v-icon dark>{{!fullScreen ? 'fullscreen' : 'fullscreen_exit'}}</v-icon>
     </v-btn>
     <v-menu offset-y>
       <template v-slot:activator="{ on }">
         <v-btn flat icon v-on="on">
-          <v-icon dark>account_circle</v-icon>
+          <v-icon dark>settings</v-icon>
         </v-btn>
       </template>
       <v-list>
@@ -53,10 +62,11 @@
 
 <script>
 import { mapMutations, mapState } from "vuex";
+import Cookies from 'js-cookie'
 export default {
   data() {
     return {
-      clipped: false,
+      clipped: true,
       tab: '',
       fullScreen: false
     }
@@ -77,11 +87,22 @@ export default {
     },
     tabs() {
       return this.$store.state.menu.tabs
-    }
+    },
+    userName(){
+      return Cookies.get('user') ? Cookies.get('user') : ''
+    },
+    noReconocidas() {
+      return this.$store.state.alarma.noReconocidas
+    },
   },
-
-  mounted() {
+  watch:{
+/*     async noReconocidas(){
+      await this.$store.dispatch('alarma/getNoReconocidas')
+    } */
+  },
+  async mounted() {
     this.tab = this.$route.path
+    await this.$store.dispatch('alarma/getNoReconocidas')
   },
 
   methods: {

@@ -1,6 +1,7 @@
 import axios from '@/plugins/axios'
 
 export const state = () => ({
+  noReconocidas:0,
   alarma: {},
   alarmas: {
     total: 20,
@@ -28,7 +29,10 @@ export const mutations = {
   },
   SET_PARAMS(state, params) {
     state.params = params
-  }
+  },
+  SET_NO_RECONOCIDAS(state, payload) {
+    state.noReconocidas = payload
+  },
 }
 
 export const actions = {
@@ -91,5 +95,16 @@ export const actions = {
             : error.response.data.message
         this.commit('notification/ALERT_ERROR', _error)
       })
-  }
+  },
+  async getNoReconocidas(context) {
+    await axios
+      .get('alarmas/no-reconocidas')
+      .then(response => {
+        console.log('NO RECONOCIDAS:', response)
+        this.commit('alarma/SET_NO_RECONOCIDAS', response.data)
+      })
+      .catch(error => {
+        console.error(error)
+      })
+  },
 }

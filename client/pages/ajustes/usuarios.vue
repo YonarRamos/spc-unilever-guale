@@ -66,12 +66,13 @@
         <v-divider dark class="my-1"></v-divider>
       </v-flex>
       <v-flex xs12>
+
         <v-data-table
           item-key="id"
           :headers="headers"
-          :items="usuarios"
+          :items="usuarios.data"
           :pagination.sync="pagination"
-          :total-items="parseInt(usuarios)"
+          :total-items="parseInt(usuarios.total)"
           :loading="loading"
           class="elevation-0 mb-1"
         >
@@ -156,7 +157,7 @@ export default {
 
   computed: {
     usuarios() {
-      return this.$store.state.usuario.usuario
+      return this.$store.state.usuario.usuarios
     },
     params() {
       return this.$store.state.usuario.params
@@ -200,9 +201,8 @@ export default {
           : [],
       }
       this.$store.commit('usuario/SET_PARAMS', params)
-      this.$store
-        .dispatch('usuario/getAll')
-        .then((response) => (this.loading = false))
+      await this.$store.dispatch('usuario/getAll')
+      this.loading = false
     },
     verBusqueda() {
       this.search = true

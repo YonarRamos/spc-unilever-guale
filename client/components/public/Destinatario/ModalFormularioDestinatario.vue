@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" :width="operacion == 'delete' ? 400 : 400">
+  <v-dialog v-model="dialog" :width="operacion == 'delete' ? 480 : 400">
     <v-card>
       <v-card-title class="headline" :style="{displey: 'flex', justifyContent: 'space-between'}">
         <v-icon>dvr</v-icon>
@@ -18,7 +18,7 @@
             <v-layout row wrap>
               <v-flex xs12>
                 <v-text-field
-                  v-model="destinatario.email"
+                  v-model="currentDestinatario.email"
                   :counter="40"
                   label="Email"
                   prepend-inner-icon="email"
@@ -28,7 +28,7 @@
 
               <v-flex xs6>
                 <v-text-field
-                  v-model="destinatario.nombre"
+                  v-model="currentDestinatario.nombre"
                   :counter="40"
                   label="Nombre"
                   prepend-inner-icon="short_text"
@@ -38,7 +38,7 @@
 
               <v-flex xs6>
                 <v-text-field
-                  v-model="destinatario.apellido"
+                  v-model="currentDestinatario.apellido"
                   :counter="40"
                   label="Apellido"
                   prepend-inner-icon="short_text"
@@ -47,7 +47,7 @@
               </v-flex>
 
               <v-flex xs6>
-                <v-switch v-model="destinatario.envio" color="blue" label="Habilitar envio"></v-switch>
+                <v-switch v-model="currentDestinatario.envio" color="blue" label="Habilitar envio"></v-switch>
               </v-flex>
             </v-layout>
           </v-container>
@@ -60,7 +60,7 @@
             <v-flex>
               <div
                 class="subheading grey--text ml-3"
-              >¿Seguro desea elinimar la destinatario: {{destinatario.email}}?</div>
+              >¿Seguro desea elinimar la destinatario: {{currentDestinatario.email}}?</div>
             </v-flex>
           </v-layout>
         </v-container>
@@ -105,6 +105,13 @@ export default {
     return {
       loading: false,
       valid: false,
+      currentDestinatario:{
+        id: null,
+        nombre: '',
+        apellido: '',
+        email: '',
+        envio: false
+      },
       rules: {
         nombre: [
           v => !!v || 'El nombre es requerido',
@@ -128,34 +135,53 @@ export default {
 
   methods: {
     async enviarFormulario() {
-      this.destinatario.tipo_maquina_id = this.tipoMaquinaSeleccionada
-      const payload = {
-        content: {
-          destinatario: this.destinatario
+      try {
+        this.currentDestinatario.tipo_maquina_id = this.tipoMaquinaSeleccionada
+        const payload = {
+          content: {
+            destinatario: this.currentDestinatario
+          }
         }
+        /* CREATE */
+        if (this.operacion === 'create') {
+          await this.$store
+            .dispatch('destinatario/create', payload)
+            .then(response => {
+              this.$store.commit('modal/MODAL_FORMULARIO_DESTINATARIO')
+              this.$emit('reload')
+            })
+            .catch(error => console.error('CREATE_DESTINATARIO_ERROR:', error))
+        }
+        /* UPDATE */
+        if (this.operacion === 'edit') {
+          await this.$store
+            .dispatch('destinatario/update', payload)
+            .then(response => {
+              this.$store.commit('modal/MODAL_FORMULARIO_DESTINATARIO')
+              this.$emit('reload')
+            })
+            .catch(error => console.error('EDIT_DESTINATARIO_ERROR:', error))
+        }
+        /* DELETE */
+        if (this.operacion === 'delete') {
+          await this.$store
+            .dispatch('destinatario/delete', payload)
+            .then(response => {
+              this.$store.commit('modal/MODAL_FORMULARIO_DESTINATARIO')
+              this.$emit('reload')
+            })
+            .catch(error => console.error('DELETE_DESTINATARIO_ERROR:', error))
+        }        
+      } catch (error) {
+        console.error('DESTINATARIO_FORM_ERROR', error)
       }
-      if (this.operacion === 'create') {
-        await this.$store
-          .dispatch('destinatario/create', payload)
-          .then(response => {
-            this.$store.commit('modal/MODAL_FORMULARIO_DESTINATARIO')
-          })
-      }
-      if (this.operacion === 'edit') {
-        await this.$store
-          .dispatch('destinatario/update', payload)
-          .then(response => {
-            this.$store.commit('modal/MODAL_FORMULARIO_DESTINATARIO')
-          })
-      }
-      if (this.operacion === 'delete') {
-        await this.$store
-          .dispatch('destinatario/delete', payload)
-          .then(response => {
-            this.$store.commit('modal/MODAL_FORMULARIO_DESTINATARIO')
-          })
-      }
+    },
+    getCurrentDestinatario(){
+      this.currentDestinatario = {...this.destinatario}
     }
+  },
+  mounted(){
+    this.getCurrentDestinatario()
   }
 }
 </script>

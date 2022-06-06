@@ -20,7 +20,7 @@
 
               <v-flex xs12>
                 <v-text-field
-                  v-model="usuario.nombre"
+                  v-model="currentUser.nombre"
                   :counter="40"
                   label="Nombre"
                   prepend-inner-icon="short_text"
@@ -30,7 +30,7 @@
 
               <v-flex xs12>
                 <v-text-field
-                  v-model="usuario.apellido"
+                  v-model="currentUser.apellido"
                   :counter="40"
                   label="Apellido"
                   prepend-inner-icon="short_text"
@@ -40,7 +40,7 @@
 
               <v-flex xs12>
                 <v-text-field
-                  v-model="usuario.email"
+                  v-model="currentUser.email"
                   :counter="40"
                   label="Email"
                   prepend-inner-icon="email"
@@ -49,7 +49,7 @@
               </v-flex>
               <v-flex xs12>
                 <v-text-field
-                  v-model="usuario.password"
+                  v-model="currentUser.password"
                   :append-icon="showPassword ? 'visibility' : 'visibility_off'"
                   :type="showPassword ? 'text' : 'password'"
                   prepend-inner-icon="lock_open"
@@ -68,7 +68,7 @@
             <v-flex>
               <div
                 class="subheading grey--text ml-3"
-              >¿Seguro desea elinimar la usuario: {{usuario.nombre}}?</div>
+              >¿Seguro desea elinimar la usuario: {{currentUser.nombre}}?</div>
             </v-flex>
           </v-layout>
         </v-container>
@@ -88,7 +88,6 @@
 
 
 <script>
-import axios from '@/plugins/axios'
 
 export default {
   props: {
@@ -112,6 +111,7 @@ export default {
     return {
       loading: false,
       valid: false,
+      currentUser:{},
       rules: {
         nombre: [
           v => !!v || 'El nombre es requerido',
@@ -135,28 +135,44 @@ export default {
 
   methods: {
     async enviarFormulario() {
-      this.usuario.tipo_maquina_id = this.tipoMaquinaSeleccionada
-      const payload = {
-        content: {
-          usuario: this.usuario
+      try {
+        this.usuario.tipo_maquina_id = this.tipoMaquinaSeleccionada
+        const payload = {
+          content: {
+            usuario: this.currentUser
+          }
         }
-      }
-      if (this.operacion === 'create') {
-        await this.$store.dispatch('usuario/create', payload).then(response => {
-          this.$store.commit('modal/MODAL_FORMULARIO_USUARIO')
+        /* CREATE */
+        if (this.operacion === 'create') {
+          await this.$store.dispatch('usuario/create', payload).then(response => {
+            this.$store.commit('modal/MODAL_FORMULARIO_USUARIO')
+          })
+          .catch(error => console.error('CREATE_USER_ERROR', error))
+        }
+        /* UPDATE */
+        if (this.operacion === 'edit') {
+          await this.$store.dispatch('usuario/update', payload).then(response => {
+            this.$store.commit('modal/MODAL_FORMULARIO_USUARIO')
+          })
+          .catch(error => console.error('CREATE_USER_ERROR', error))
+        }
+        /* DELETE */
+        if (this.operacion === 'delete') {
+            await this.$store.dispatch('usuario/delete', payload).then(response => {
+            this.$store.commit('modal/MODAL_FORMULARIO_USUARIO')
         })
+        .catch(error => console.error('CREATE_USER_ERROR', error))
+        }       
+      } catch (error) {
+        console.error('USER_FORM_ERROR', error)
       }
-      if (this.operacion === 'edit') {
-        await this.$store.dispatch('usuario/update', payload).then(response => {
-          this.$store.commit('modal/MODAL_FORMULARIO_USUARIO')
-        })
-      }
-      if (this.operacion === 'delete') {
-        await this.$store.dispatch('usuario/delete', payload).then(response => {
-          this.$store.commit('modal/MODAL_FORMULARIO_USUARIO')
-        })
-      }
+    },
+    getCurrentUser(){
+      this.currentUser = {...this.usuario}
     }
+  },
+  mounted(){
+    this.getCurrentUser()
   }
 }
 </script>

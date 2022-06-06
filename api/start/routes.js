@@ -31,6 +31,7 @@ Route.put('api/v1/users/:id', 'UserController.update').validator('User/UpdateUse
 Route.delete('api/v1/users/:id', 'UserController.destroy');
 
 // Tendencias
+Route.get('api/v1/tendenciasTv', 'TendenciaController.indexTV');
 Route.get('api/v1/tendencias', 'TendenciaController.index');
 Route.get('api/v1/tendencias/:id', 'TendenciaController.show');
 Route.post('api/v1/tendencias', 'TendenciaController.store').validator('Tendencia/StoreTendencia');
@@ -56,6 +57,7 @@ Route.post('api/v1/limites', 'LimiteController.store').validator('Limite/StoreLi
 Route.put('api/v1/limites/:id', 'LimiteController.update');
 Route.delete('api/v1/limites/:id', 'LimiteController.destroy');
 Route.get('api/v1/limites/:id/historicos', 'LimiteController.indexHistoricos');
+Route.get('api/v1/limites/historico/:id', 'LimitesHistoricoController.index');
 
 // Historicos
 Route.get('api/v1/historicos', 'HistoricoController.index');
@@ -73,6 +75,7 @@ Route.delete('api/v1/destinatarios/:id', 'DestinatarioController.destroy');
 
 // Alarmas
 Route.get('api/v1/alarmas', 'AlarmaController.index');
+Route.get('api/v1/alarmas/no-reconocidas', 'AlarmaController.noReconocidasCount');
 Route.put('api/v1/alarmas/:id/reconocer', 'AlarmaController.reconocer');
 
 // Productos

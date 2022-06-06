@@ -15,6 +15,12 @@ class Alarma extends Model {
   tendencia() {
     return this.belongsTo('App/Models/Tendencia');
   }
+  usuario() {
+    return this.hasOne('App/Models/User', 'usuario', 'id');
+  } 
+  descripcion_alarma(){
+    return this.hasOne('App/Models/AlarmaTipo', 'tipo', 'tipo');
+  }
 }
 
 module.exports = Alarma;

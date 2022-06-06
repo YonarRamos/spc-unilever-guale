@@ -1,55 +1,72 @@
 <template>
   <v-layout justify-center>
     <v-layout row wrap>
-      <v-flex lg2 md4 xs12>
+      <!-- <v-flex lg2 md4 xs12>
         <v-btn small color="success" class="white--text" @click="createLimite()">
           <v-icon>add</v-icon>
           <span class="ml-2">limite</span>
         </v-btn>
-      </v-flex>
-      <v-flex xs12>
-        <v-data-table
-          item-key="id"
-          :headers="headers"
-          :items="limites"
-          :pagination.sync="pagination"
-          :total-items="parseInt(limites.total)"
-          :loading="loading"
-          class="elevation-0 mt-3"
-        >{{items}}
-          <template v-slot:items="props">
-            <tr>
-              <td class="text-xs-left">
-                <strong class="blue-grey--text ml-3">{{ props.item.codigo_producto }}</strong>
-              </td>
-              <!-- <td class="text-xs-left">{{ props.item.created_at}}</td> -->
-              <td class="text-xs-left">{{ props.item.lh_1sigma }}</td>
-              <td class="text-xs-left">{{ props.item.ll_1sigma }}</td>
-              <td class="text-xs-left">{{ props.item.lh_2sigma }}</td>
-              <td class="text-xs-left">{{ props.item.ll_2sigma }}</td>
-              <td class="text-xs-left">{{ props.item.lh_3sigma }}</td>
-              <td class="text-xs-left">{{ props.item.ll_3sigma }}</td>
-              <td class="text-xs-left">{{ props.item.usl }}</td>
-              <td class="text-xs-left">{{ props.item.lsl }}</td>
-              <td class="text-xs-left">{{ props.item.usl_rango }}</td>
-              <td class="text-xs-left">{{ props.item.lsl_rango }}</td>
-              <td class="text-xs-left">{{ props.item.media }}</td>
-              <td class="text-xs-left">{{ props.item.media_rango }}</td>
-              <td class="text-xs-right">
-                <div>
-                  <v-icon color="blue" @click="editarLimite(props.item)">edit</v-icon>
-                  <v-icon color="pink" @click="eliminarLimite(props.item)">delete</v-icon>
-                </div>
-              </td>
-            </tr>
-          </template>
-        </v-data-table>
+      </v-flex> -->
+      <v-flex xs12 >          
+        <div class="ajustes_tendencias_wrapper">
+
+          <v-data-table
+            item-key="id"
+            :headers="headers"
+            :items="limites"
+            :pagination.sync="pagination"
+            :total-items="parseInt(total)"
+            :loading="loading"
+            class="elevation-0"
+          >
+            <template v-slot:items="props">
+              <tr>
+                <td class="text-xs-left">
+                  <strong class="blue-grey--text ml-3">{{ props.item.nombre }}</strong>
+                </td>
+                <td class="text-xs-left">
+                  <span class="blue-grey--text ml-3">{{ props.item.codigo_producto }}</span>
+                </td>
+                <!-- <td class="text-xs-left">{{ props.item.created_at}}</td> -->
+                <td class="text-xs-left">{{ props.item.lh_1sigma }}</td>
+                <td class="text-xs-left">{{ props.item.ll_1sigma }}</td>
+                <td class="text-xs-left">{{ props.item.lh_2sigma }}</td>
+                <td class="text-xs-left">{{ props.item.ll_2sigma }}</td>
+                <td class="text-xs-left">{{ props.item.lh_3sigma }}</td>
+                <td class="text-xs-left">{{ props.item.ll_3sigma }}</td>
+                <td class="text-xs-left">{{ props.item.usl }}</td>
+                <td class="text-xs-left">{{ props.item.lsl }}</td>
+                <td class="text-xs-left">{{ props.item.usl_rango }}</td>
+                <td class="text-xs-left">{{ props.item.lsl_rango }}</td>
+                <td class="text-xs-left">{{ props.item.media }}</td>
+                <td class="text-xs-left">{{ props.item.media_rango }}</td>
+                <td class="text-xs-right">
+                  <div style="display:flex;align-item:center;cursor:pointer;justify-content:space-between;">
+                    <!-- <div style="margin-top:-3px;margin-right:5px;"><v-img src="/hist.svg" height="30px" width="30px" @click="eliminarLimite(props.item)"/></div> -->
+                    <modal-historico-limites :limit_id="props.item.id" :limit_name="props.item.nombre"/>
+                    <v-icon color="blue" @click="editarLimite(props.item)">edit</v-icon>
+                    <v-icon color="pink" @click="eliminarLimite(props.item)">delete</v-icon>
+                  </div>
+                </td>
+              </tr>
+            </template>
+            <template v-slot:actions-prepend>
+              <div class="slot__footer_table">
+                <v-btn small color="success" class="white--text" @click="createLimite()">
+                  <v-icon>add</v-icon>
+                  <span class="ml-2">limite</span>
+                </v-btn>                
+              </div>
+            </template>
+          </v-data-table>          
+        </div>
+
       </v-flex>
     </v-layout>
     <modal-formulario-limite
       v-if="modalFormularioLimite"
       :tendencia="tendencia"
-      :limite="limite"
+      :limiteProp="limite"
       :operacion="operacion"
     ></modal-formulario-limite>
   </v-layout>
@@ -57,6 +74,7 @@
 
 <script>
 import ModalFormularioLimite from '@/components/public/Tendencia/ModalFormularioLimite'
+import ModalHistoricoLimites from '@/components/public/Tendencia/HistoricoLimites'
 
 export default {
   props: {
@@ -65,9 +83,9 @@ export default {
       required: true
     }
   },
-
   components: {
-    ModalFormularioLimite
+    ModalFormularioLimite,
+    ModalHistoricoLimites
   },
 
   data() {
@@ -90,9 +108,15 @@ export default {
         media: 0,
         media_rango: 0,
         codigo_producto: null,
-        tendencia_id: null
+        tendencia_id: null,
+        nombre:null
       },
       headers: [
+        {
+          text: 'Nombre',
+          value: 'nombre',
+          align: 'left',
+        },
         {
           text: 'Codigo producto',
           value: 'codigo_producto',
@@ -140,7 +164,10 @@ export default {
       return this.$store.state.modal.modalFormularioLimite
     },
     limites() {
-      return this.$store.state.limite.limitesByTendencia
+      return this.$store.state.limite.limitesByTendencia.data
+    },
+    total() {
+      return this.$store.state.limite.limitesByTendencia.total
     }
   },
 
@@ -168,7 +195,7 @@ export default {
     async eliminarLimite(limite) {
       this.limite = limite
       this.operacion = 'delete'
-      this.$store.commit('modal/MODAL_FORMULARIO_LIMITE')
+      this.$store.commit('modal/MODAL_FORMULARIO_LIMITE', limite)
     },
     async editarLimite(limite) {
       this.limite = limite
@@ -199,3 +226,14 @@ export default {
   }
 }
 </script>
+
+<style>
+.ajustes_tendencias_wrapper{
+  width: 95vw;
+}
+.slot__footer_table{
+  position: absolute;
+  bottom: 2rem;
+  left: 1rem;
+}
+</style>

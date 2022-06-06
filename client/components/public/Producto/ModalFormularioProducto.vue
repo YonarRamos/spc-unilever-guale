@@ -1,13 +1,17 @@
 <template>
-  <v-dialog v-model="dialog" :width="operacion == 'delete' ? 400 : 400">
-    <v-card>
-      <v-card-title class="headline" :style="{displey: 'flex', justifyContent: 'space-between'}">
-        <v-icon>dvr</v-icon>
-        <div v-if="operacion === 'create'">AGREGAR PRODUCTO</div>
-        <div v-if="operacion === 'edit'">EDITAR PRODUCTO</div>
-        <div v-if="operacion === 'delete'">ELIMINAR PRODUCTO</div>
+  <v-dialog v-model="dialog" :width="operacion == 'delete' ? 480 : 400">
+    <v-card :style="{borderRadius:'10px'}">
+      <v-card-title class="headline" :style="{display: 'flex', justifyContent: 'space-between'}">
+        <div :style="{display: 'flex', justifyContent: 'flex-start', alignItems:'center'}">
+          <v-icon :style="{ marginRight:'5px' }" >dvr</v-icon>
+          <div v-if="operacion === 'create'">Agregar Producto</div>
+          <div v-if="operacion === 'edit'">Editar Producto</div>
+          <div v-if="operacion === 'delete'">Eliminar Producto</div>          
+        </div>
+
         <v-icon :style="{cursor: 'pointer'}" @click="dialog = false">close</v-icon>
       </v-card-title>
+
       <v-card-text>
         <v-form
           v-model="valid"
@@ -18,9 +22,9 @@
             <v-layout row wrap>
               <v-flex xs12>
                 <v-text-field
-                  v-model="producto.codigo"
+                  v-model="currentProduct.codigo"
                   :counter="40"
-                  label="Codigo"
+                  label="Código"
                   prepend-inner-icon="storage"
                   required
                 ></v-text-field>
@@ -28,24 +32,24 @@
 
               <v-flex xs12>
                 <v-textarea
-                  v-model="producto.descripcion"
+                  v-model="currentProduct.descripcion"
                   :counter="40"
-                  label="Descripcion"
+                  label="Descripción"
                   prepend-inner-icon="sort"
                 ></v-textarea>
               </v-flex>
             </v-layout>
           </v-container>
         </v-form>
-        <v-container>
-          <v-layout row v-if="operacion == 'delete'">
+        <v-container v-if="operacion == 'delete'">
+          <v-layout row>
             <v-flex>
               <v-icon :style="{fontSize: '48px'}" color="orange">warning</v-icon>
             </v-flex>
             <v-flex>
               <div
                 class="subheading grey--text ml-3"
-              >¿Seguro desea elinimar la producto: {{producto.nombre}}?</div>
+              >¿Seguro desea elinimar la producto: {{currentProduct.codigo}}?</div>
             </v-flex>
           </v-layout>
         </v-container>
@@ -65,7 +69,6 @@
 
 
 <script>
-import axios from '@/plugins/axios'
 
 export default {
   props: {
@@ -87,6 +90,7 @@ export default {
     return {
       loading: false,
       valid: false,
+      currentProduct:{},
       rules: {
         nombre: [
           v => !!v || 'El nombre es requerido',
@@ -110,36 +114,52 @@ export default {
 
   methods: {
     async enviarFormulario() {
-      const payload = {
-        content: {
-          producto: this.producto
-        }
+      try {
+        const payload = {
+                content: {
+                  producto: this.currentProduct
+                }
+              }
+              /* CREATE */
+              if (this.operacion === 'create') {
+                await this.$store
+                  .dispatch('producto/create', payload)
+                  .then(response => {
+                    this.$store.commit('modal/MODAL_FORMULARIO_PRODUCTO')
+                    this.$store.dispatch('producto/getAll')
+                  })
+                  .catch(error => console.error('CREATE_PRODUCT_ERROR', error))
+              }
+              /* UPDATE */
+              if (this.operacion === 'edit') {
+                await this.$store
+                  .dispatch('producto/update', payload)
+                  .then(response => {
+                    this.$store.commit('modal/MODAL_FORMULARIO_PRODUCTO')
+                    this.$store.dispatch('producto/getAll')
+                  })
+                  .catch(error => console.error('EDIT_PRODUCT_ERROR', error))
+              }
+              /* DELETE */
+              if (this.operacion === 'delete') {
+                await this.$store
+                  .dispatch('producto/delete', payload)
+                  .then(response => {
+                    this.$store.commit('modal/MODAL_FORMULARIO_PRODUCTO')
+                    this.$store.dispatch('producto/getAll')
+                  })
+                  .catch(error => console.error('DELETE_PRODUCT_ERROR', error))
+              }        
+      } catch (error) {
+        console.error('PRODUCT_OPERATION_ERROR', error)
       }
-      if (this.operacion === 'create') {
-        await this.$store
-          .dispatch('producto/create', payload)
-          .then(response => {
-            this.$store.commit('modal/MODAL_FORMULARIO_PRODUCTO')
-            this.$store.dispatch('producto/getAll')
-          })
-      }
-      if (this.operacion === 'edit') {
-        await this.$store
-          .dispatch('producto/update', payload)
-          .then(response => {
-            this.$store.commit('modal/MODAL_FORMULARIO_PRODUCTO')
-            this.$store.dispatch('producto/getAll')
-          })
-      }
-      if (this.operacion === 'delete') {
-        await this.$store
-          .dispatch('producto/delete', payload)
-          .then(response => {
-            this.$store.commit('modal/MODAL_FORMULARIO_PRODUCTO')
-            this.$store.dispatch('producto/getAll')
-          })
-      }
+    },
+    getCurrentProduct(){
+      this.currentProduct = {...this.producto}
     }
+  },
+  mounted(){
+    this.getCurrentProduct()
   }
 }
 </script>

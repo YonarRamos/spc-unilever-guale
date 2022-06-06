@@ -8,7 +8,7 @@
   >
     <v-tabs-slider color="yellow"></v-tabs-slider>
     <v-tab v-for="(item, i) in tabs" :key="i" :to="item.to">
-      <v-icon class="mr-2" small>{{ item.icon }}</v-icon>
+      <v-icon small>{{ item.icon }}</v-icon>
       <span :style="{fontSize: '12px'}">{{ item.title }}</span>
     </v-tab>
   </v-tabs>

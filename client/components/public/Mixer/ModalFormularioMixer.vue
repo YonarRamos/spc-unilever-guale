@@ -1,5 +1,5 @@
 <template>
-  <v-dialog v-model="dialog" :width="operacion == 'delete' ? 400 : 400">
+  <v-dialog v-model="dialog" :width="operacion == 'delete' ? 480 : 400">
     <v-card>
       <v-card-title class="headline" :style="{displey: 'flex', justifyContent: 'space-between'}">
         <v-icon>dvr</v-icon>
@@ -18,7 +18,7 @@
             <v-layout row wrap>
               <v-flex xs12>
                 <v-text-field
-                  v-model="mixer.nombre"
+                  v-model="currentMixer.nombre"
                   :counter="40"
                   label="Nombre"
                   prepend-inner-icon="sort"
@@ -28,7 +28,7 @@
 
               <v-flex xs12>
                 <v-textarea
-                  v-model="mixer.descripcion"
+                  v-model="currentMixer.descripcion"
                   :counter="40"
                   label="Descripcion"
                   prepend-inner-icon="sort"
@@ -45,7 +45,7 @@
             <v-flex>
               <div
                 class="subheading grey--text ml-3"
-              >¿Seguro desea elinimar la mixer: {{mixer.nombre}}?</div>
+              >¿Seguro desea elinimar la mixer: {{currentMixer.nombre}}?</div>
             </v-flex>
           </v-layout>
         </v-container>
@@ -65,7 +65,6 @@
 
 
 <script>
-import axios from '@/plugins/axios'
 
 export default {
   props: {
@@ -87,6 +86,10 @@ export default {
     return {
       loading: false,
       valid: false,
+      currentMixer:{
+        nombre: '',
+        descripcion: ''
+      },
       rules: {
         nombre: [
           v => !!v || 'El nombre es requerido',
@@ -112,7 +115,7 @@ export default {
     async enviarFormulario() {
       const payload = {
         content: {
-          mixer: this.mixer
+          mixer: this.currentMixer
         }
       }
       if (this.operacion === 'create') {
@@ -133,7 +136,13 @@ export default {
           this.$store.dispatch('mixer/getAll')
         })
       }
+    },
+    getCurrentMixer(){
+      this.currentMixer = {...this.mixer}
     }
+  },
+  mounted(){
+    this.getCurrentMixer()
   }
 }
 </script>

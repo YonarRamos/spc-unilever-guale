@@ -1,11 +1,12 @@
 <template>
-  <div class="box panel">
+  <div class="box">
     <v-data-table
       item-key="indicador"
       hide-actions
       :headers="headers"
       :items="items"
       class="elevation-0"
+      v-show="items.length > 0"
     >
       <template v-slot:items="props">
         <td class="text-xs-left">
@@ -17,14 +18,6 @@
   </div>
 </template>
 
-<style scoped>
-.panel {
-  width: 100%;
-  height: 60vh;
-}
-</style>
-
-
 <script>
 import moment from 'moment'
 import echarts from 'echarts'
@@ -34,9 +27,39 @@ import axios from '@/plugins/axios'
 
 export default {
   props: {
-    tendencia: Object,
-    historicosPV: Array,
-    limite: Object,
+    tendencia: {
+      type: Object,
+      default() {
+        return {
+            nombre:'',
+            descripcion: ''
+          }
+        }
+    },
+    historicosPV: {
+      type: Array,
+      default() {
+            return []
+        }
+    },
+    historicosByLimits: {
+      type: Object,
+      default() {
+            return {}
+        }
+    },
+    limitsName: {
+      type: Array,
+      default() {
+        return []
+      }
+    },
+    limite: {
+      type: Object,
+      default() {
+        return {}
+        }
+    },
     update: Boolean
   },
 
@@ -60,76 +83,82 @@ export default {
       ]
     }
   },
-
-  watch: {
-    historicosPV() {
-      if (this.tendencia) {
-        this.generarData()
-      }
+  computed: {
+    tiempoReal(){
+      return this.$store.state.socket.tiempoReal
     },
+    indexLimit(){
+      return this.$store.state.tendencia.indexTendenciaLimite
+    }
+  },
+  watch: {
     update() {
-      if (this.tendencia) {
-        this.generarData()
-      }
+      this.generarData()
     }
   },
 
   methods: {
     generarData() {
       this.items = []
-      if (this.historicosPV.length > 3) {
-        let pv = this.historicosPV.map(item => {
-          return item.valor
-        })
-        let std = mathjs.std(pv)
-        this.std = mathjs.round(std, 4)
-        this.items.push({
-          indicador: 'STD',
-          valor: this.std
-        })
+      if (this.historicosPV && this.historicosPV.length > 0) {
 
-        let mediacalc = mathjs.mean(pv)
-        this.media = mathjs.round(mediacalc, 4)
-        this.items.push({
-          indicador: 'MEDIA',
-          valor: this.media
-        })
+          let pv = this.historicosPV.map(item => {
+            return item.pv
+          })          
 
-        const cp = mathjs.round(
-          (this.limite.usl - this.limite.lsl) / (6 * this.std),
-          2
-        )
-        this.cp = mathjs.round(cp, 4)
-        this.items.push({
-          indicador: 'CP',
-          valor: this.cp
-        })
+          if(pv.length > 0) {
+            let std = mathjs.std(pv)
+            this.std = mathjs.round(std, 4)
+            this.items.push({
+              indicador: 'STD',
+              valor: (isNaN(this.std) ? 0 : this.std).toFixed(2)
+            })
 
-        const cpu = mathjs.round(
-          (this.limite.usl - mediacalc) / (3 * this.std),
-          2
-        )
-        this.cpu = mathjs.round(cpu, 4)
-        this.items.push({
-          indicador: 'CPU',
-          valor: this.cpu
-        })
+            let mediacalc = mathjs.mean(pv)
+            this.media = mathjs.round(mediacalc, 4)
+            this.items.push({
+              indicador: 'MEDIA',
+              valor: (isNaN(this.media) ? 0 : this.media).toFixed(2)
+            })          
 
-        const cpl = mathjs.round(
-          (mediacalc - this.limite.lsl) / (3 * this.std),
-          2
-        )
-        this.cpl = mathjs.round(cpl, 4)
-        this.items.push({
-          indicador: 'CPL',
-          valor: this.cpl
-        })
+            if(this.limite){
+              const cp = mathjs.round(
+                (this.limite.usl - this.limite.lsl) / (6 * this.std),
+                2
+              )
+              this.cp = mathjs.round(cp, 4)
+              this.items.push({
+                indicador: 'CP',
+                valor: (isNaN(this.cp) ? 0 : this.cp).toFixed(2)
+              })
 
-        this.cpk = mathjs.round(Math.min(this.cpu, this.cpl), 4)
-        this.items.push({
-          indicador: 'CPK',
-          valor: this.cpk
-        })
+              const cpu = mathjs.round(
+                (this.limite.usl - mediacalc) / (3 * this.std),
+                2
+              )
+              this.cpu = mathjs.round(cpu, 4)
+              this.items.push({
+                indicador: 'CPU',
+                valor: (isNaN(this.cpu) ? 0 : this.cpu).toFixed(2)
+              })
+
+              const cpl = mathjs.round(
+                (mediacalc - this.limite.lsl) / (3 * this.std),
+                2
+              )
+              this.cpl = mathjs.round(cpl, 4)
+              this.items.push({
+                indicador: 'CPL',
+                valor: (isNaN(this.cpl) ? 0 : this.cpl).toFixed(2)
+              })
+
+              this.cpk = mathjs.round(Math.min(this.cpu, this.cpl), 4)
+              this.items.push({
+                indicador: 'CPK',
+                valor: (isNaN(this.cpk) ? 0 : this.cpk).toFixed(2)
+              })          
+            }
+          }
       }
     },
     guardarLimite() {
@@ -149,3 +178,11 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+.box{
+  width: 100%;
+  height: 60vh;
+  padding: 5px 0 5px 0;
+}
+</style>

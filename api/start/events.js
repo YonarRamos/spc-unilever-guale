@@ -14,7 +14,7 @@ async function adquisicionRapida() {
       await Adquisicion.tomaDatos(true);
       //await WebSocketHistoricosTendencia.start();
       adquisicionRapida();
-    }, 3000);
+    }, 10000);
 
     return Promise.resolve();
   } catch (error) {

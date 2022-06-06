@@ -11,8 +11,24 @@ export const state = () => ({
     tendencia: null,
     historicosPV: [],
     historicosSP: [],
+    historicosCP: [],
+    historicosByLimits:{},
     historicosProductos: [],
-    limite: null
+    limite: {
+      lh_1sigma: null,
+      ll_1sigma: null,
+      lh_2sigma: null,
+      ll_2sigma: null,
+      lh_3sigma: null,
+      ll_3sigma: null,
+      usl: null,
+      lsl: null,
+      usl_rango: null,
+      lsl_rango: null,
+      media: [],
+      media_rango: null,
+      tendencia_id: null
+    }
   },
   tendenciaTv1Seleccionada: 0,
   detalleTendenciaTv1: {
@@ -98,37 +114,97 @@ export const mutations = {
   SET_ACTUALIZAR_TABLA_TENDENCIAS(state) {
     state.actualizarTablaTendencias = !state.actualizarTablaTendencias
   },
-  SOCKET(state, ws) {
-    console.log('aaaaaaaaaaaaaaaaaa' , state)
-    ws.connect()
-    const channel = ws.subscribe('socket')
+  RESET_DETALLE_TENDENCIA(state) {
+    state.detalleTendencia = {
+      tendencia: null,
+      historicosPV: [],
+      historicosSP: [],
+      historicosCP: [],
+      historicosByLimits:{},
+      historicosProductos: [],
+      limite: {
+        lh_1sigma: null,
+        ll_1sigma: null,
+        lh_2sigma: null,
+        ll_2sigma: null,
+        lh_3sigma: null,
+        ll_3sigma: null,
+        usl: null,
+        lsl: null,
+        usl_rango: null,
+        lsl_rango: null,
+        media: [],
+        media_rango: null,
+        tendencia_id: null
+      }
+    }
+  },
+  async DISCONNECT_SOCKET(state, ws){
+    console.log('Conectando socket...')
+    await ws.close();
+    console.log('status ready:' , ws)
+    console.log('status' , ws._connectionState)
+  },
+  async SOCKET(state, ws) {
+    const fechas = [
+      new Date(
+        moment()
+          .add(-7, 'days')
+          .format('YYYY-MM-DD HH:mm:ss')
+      ),
+      new Date()
+    ]
+    await axios
+    .get(`tendencias`, {params:{ fechas }})
+    .then(async response => {
+      console.log('Çonsulta inicial socket:', response.data)
+      await this.commit('socket/SET_DETALLE_TENDENCIA', response.data)
+    })  
 
-    // channel.on('tendencias', async datos => {
-    //   if (datos) {
-    //     datos.map(async function (item) {
-    //       let payload = {
-    //         params: {
-    //           producto : item.codigo_producto_actual,
-    //           fechas: [
-    //             moment()
-    //               .add(-180, 'days')
-    //               .format('YYYY-MM-DD HH:mm:ss'),
-    //             moment().format('YYYY-MM-DD HH:mm:ss')
-    //           ]
-    //         }
-    //       }
-    //       await axios
-    //         .get(`tendencias/${item.tendencia}`, {
-    //           params: payload.params
-    //         })
-    //         .then(response => {
-    //           const str = JSON.stringify(response.data)
-    //           localStorage.setItem(`TV${item.tv}`, str)
-    //           state.detalleTendenciaTv1 = response.data
-    //         })
-    //     })
-    //   }
+    if(ws._connectionState != 'open'){
+      await ws.connect()
+      const channel = await ws.subscribe('socket')
+      channel.on('tendencias', async datos => {
+        if (datos) {
+          console.log('Payload-WS:', datos)
+          await this.commit('socket/SET_DETALLE_TENDENCIA', datos)
+        }
+      })
+    }
+  }
+}
+export const actions = {
+  async DISCONNECT_SOCKET(state, ws){
+    await ws.close();
+    console.log('status ready:' , ws)
+    console.log('status' , ws._connectionState)
+  },
+  async SOCKET(state, ws) {
+    console.log('Connecting WS' , ws)
+    console.log('ws state:', ws.state)
+    const fechas = [
+      new Date(
+        moment()
+          .add(-24, 'hours')
+          .format('YYYY-MM-DD HH:mm:ss')
+      ),
+      new Date()
+    ]
+    await axios
+    .get(`tendencias`, {params:{fechas}})
+    .then(async response => {
+      await this.commit('socket/SET_DETALLE_TENDENCIA', response.data)
+    })  
 
-    // })
+    if(ws._connectionState != 'open'){
+      await ws.connect()
+      const channel = await ws.subscribe('socket')
+      channel.on('tendencias', async datos => {
+        if (datos) {
+          console.log('Payload-WS:', datos)
+          await this.commit('socket/SET_DETALLE_TENDENCIA', datos)
+        }
+      })
+    }
   }
 }

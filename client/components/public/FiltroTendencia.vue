@@ -1,198 +1,318 @@
 <template>
-  <v-layout row wrap class="filtro white">
-    <v-flex xs12>
-      <v-layout row>
-        <!-- <v-flex class="divider">
-          <v-combobox
-            label="Tecnologia"
-            prepend-icon="build"
-            :loading="loadingTecnologias"
-            v-model="tecnologiasSeleccionada"
-            :items="tecnologiasItems"
-            multiple
-          >
-            <template v-slot:selection="{ item, index }">
-              <span v-if="index === 0">{{ item.nombre }}</span>
-              <span
-                v-if="index === 1"
-                class="grey--text caption ml-2"
-              >(+{{ tecnologiasSeleccionada.length - 1 }} seleccionadas)</span>
-            </template>
-          </v-combobox>
-        </v-flex> -->
-
-        <v-flex class="divider">
+  <v-form ref="form" v-model="valid" lazy-validation>
+    <v-container
+      fluid
+      class="filtro main__container filtro_tendencia_container px-3 py-2"
+    >
+      <v-layout row v-if="!tiempoReal">
+        <v-flex xs4 class="divider">
           <v-combobox
             label="Mixers"
-            prepend-icon="data_usage"
+            prepend-inner-icon="data_usage"
             :loading="loadingMixers"
             v-model="mixersSeleccionada"
             :items="mixersItems"
             multiple
+            solo
+            flat
+            hide-details
+            class="combo__filter py-1"
           >
             <template v-slot:selection="{ item, index }">
               <span v-if="index === 0">{{ item.nombre }}</span>
-              <span
-                v-if="index === 1"
-                class="grey--text caption ml-2"
-              >(+{{ mixersSeleccionada.length - 1 }} seleccionados)</span>
+              <span v-if="index === 1" class="grey--text caption ml-2"
+                >(+{{ mixersSeleccionada.length - 1 }} seleccionados)</span
+              >
             </template>
           </v-combobox>
         </v-flex>
-
-        <v-flex class="divider">
+        <v-flex xs4 class="divider">
           <v-combobox
             label="Tendencia"
-            prepend-icon="timeline"
+            prepend-inner-icon="timeline"
             :loading="loadingTendencias"
             v-model="tendenciaSeleccionada"
             :items="tendenciasItems"
-          >{{tendenciasItems}}</v-combobox>
+            required
+            solo
+            flat
+            dense
+            hide-details
+            background-color="white"
+            :rules="nameRules"
+            class="combo__filter py-1"
+            >{{ tendenciasItems }}</v-combobox
+          >
         </v-flex>
 
-        <v-flex class="divider">
-          <v-combobox
-            label="Productos"
-            prepend-icon="storage"
-            :loading="loadingProductos"
-            v-model="productoSeleccionada"
+        <v-flex xs4 class="divider">
+          <v-autocomplete
+            v-model="productosSeleccionados"
             :items="productosItems"
-          ></v-combobox>
+            item-text="descripcion"
+            item-value="codigo"
+            multiple
+            label="Productos"
+            persistent-hint
+            prepend-inner-icon="storage"
+            solo
+            flat
+            dense
+            hide-details
+            background-color="white"
+            class="combo__filter py-1"
+          >
+            <template v-slot:selection="{ item, index }">
+              <span v-if="index === 0">{{ item.descripcion }}</span>
+              <span v-if="index === 1" class="grey--text caption ml-2"
+                >(+{{ productosSeleccionados.length - 1 }} seleccionados)</span
+              >
+            </template>
+          </v-autocomplete>
         </v-flex>
       </v-layout>
-    </v-flex>
+      <!-- ******************** INICIO-->
 
-    <v-flex class="divider mr-2">
-      <v-switch v-model="tiempoReal" label="Tiempo Real" color="blue" :style="{marginTop: '-2px'}"></v-switch>
-      <v-switch
-        v-model="minMaxPorLimite"
-        label="(Max Min) Por historico"
-        color="blue"
-        :style="{marginTop: '-26px'}"
-      ></v-switch>
-    </v-flex>
+      <v-layout row v-if="!tiempoReal">
+        <v-flex xs12 sm6>
+          <div class="frame">
+            <h5>Desde:</h5>
+            <div class="wrapper inputs__time ">
+              <v-menu
+                ref="menuFechaDesde"
+                v-model="menuFechaDesde"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                :return-value.sync="fechaDesde"
+                lazy
+                transition="scale-transition"
+                offset-y
+                dense
+                full-width
+                width="140px"
+                class="my-0 py-0"
+              >
+                <template v-slot:activator="{ on }" class="pt-0">
+                  <v-text-field
+                    v-model="fechaDesde"
+                    label="Desde"
+                    prepend-icon="event"
+                    dense
+                    readonly
+                    solo
+                    flat
+                    v-on="on"
+                    hide-details
+                  ></v-text-field>
+                </template>
+                <v-date-picker v-model="fechaDesde" no-title scrollable >
+                  <v-spacer></v-spacer>
+                  <v-btn flat color="primary" @click="menuFechaDesde = false">Cancelar</v-btn>
+                  <v-btn
+                    flat
+                    color="primary"
+                    @click="$refs.menuFechaDesde.save(fechaDesde)"
+                    >OK</v-btn
+                  >
+                </v-date-picker>
+              </v-menu>
+              <v-divider vertical class="divider__style" />
+              <!-- Hora desde-->
+              <v-menu
+                ref="menuHoraDesde"
+                v-model="menuHoraDesde"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                :return-value.sync="horaDesde"
+                lazy
+                transition="scale-transition"
+                offset-y
+                full-width
+                width="140px"
+                class="inputs__time"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="horaDesde"
+                    label="Desde"
+                    prepend-icon="alarm"
+                    readonly
+                    solo
+                    flat
+                    hide-details
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-time-picker v-model="horaDesde" no-title scrollable>
+                  <v-spacer></v-spacer>
+                  <v-btn flat color="primary" @click="menuHoraDesde = false"
+                    >Cancelar</v-btn
+                  >
+                  <v-btn
+                    flat
+                    color="primary"
+                    @click="$refs.menuHoraDesde.save(horaDesde)"
+                    >OK</v-btn
+                  >
+                </v-time-picker>
+              </v-menu>
+            </div>
+          </div>
+        </v-flex>
 
-    <v-flex>
-      <v-menu
-        ref="menuFechaDesde"
-        v-model="menuFechaDesde"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        :return-value.sync="fechaDesde"
-        lazy
-        transition="scale-transition"
-        offset-y
-        full-width
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field v-model="fechaDesde" label="Desde" prepend-icon="event" readonly v-on="on"></v-text-field>
-        </template>
-        <v-date-picker v-model="fechaDesde" no-title scrollable>
-          <v-spacer></v-spacer>
-          <v-btn flat color="primary" @click="menuFechaDesde = false">Cancelar</v-btn>
-          <v-btn flat color="primary" @click="$refs.menuFechaDesde.save(fechaDesde)">OK</v-btn>
-        </v-date-picker>
-      </v-menu>
-    </v-flex>
+        <v-flex xs12 sm6>
+          <div class="frame">
+            <h5>Hasta:</h5>
+            <div class="wrapper inputs__time">
+              <v-menu
+                ref="menuFechaHasta"
+                v-model="menuFechaHasta"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                :return-value.sync="fechaHasta"
+                lazy
+                transition="scale-transition"
+                offset-y
+                dense
+                full-width
+                width="140px"
+                class="my-0 py-0 inputs__time"
+              >
+                <template v-slot:activator="{ on }" class="pt-0">
+                  <v-text-field
+                    v-model="fechaHasta"
+                    label="Hasta"
+                    prepend-icon="event"
+                    dense
+                    readonly
+                    solo
+                    flat
+                    v-on="on"
+                    hide-details
+                  ></v-text-field>
+                </template>
+                <v-date-picker v-model="fechaHasta" no-title scrollable>
+                  <v-spacer></v-spacer>
+                  <v-btn flat color="primary" @click="menuFechaHasta = false"
+                    >Cancelar</v-btn
+                  >
+                  <v-btn
+                    flat
+                    color="primary"
+                    @click="$refs.menuFechaHasta.save(fechaHasta)"
+                    >OK</v-btn
+                  >
+                </v-date-picker>
+              </v-menu>
+              <v-divider vertical class="divider__style" />
+              <!-- Hora desde-->
+              <v-menu
+                ref="menuHoraHasta"
+                v-model="menuHoraHasta"
+                :close-on-content-click="false"
+                :nudge-right="40"
+                :return-value.sync="horaHasta"
+                lazy
+                transition="scale-transition"
+                offset-y
+                full-width
+                width="140px"
+                class="inputs__time"
+              >
+                <template v-slot:activator="{ on }">
+                  <v-text-field
+                    v-model="horaHasta"
+                    label="Desde"
+                    prepend-icon="alarm"
+                    readonly
+                    solo
+                    flat
+                    hide-details
+                    v-on="on"
+                  ></v-text-field>
+                </template>
+                <v-time-picker v-model="horaHasta" no-title scrollable>
+                  <v-spacer></v-spacer>
+                  <v-btn flat color="primary" @click="menuHoraHasta = false"
+                    >Cancelar</v-btn
+                  >
+                  <v-btn
+                    flat
+                    color="primary"
+                    @click="$refs.menuHoraHasta.save(horaHasta)"
+                    >OK</v-btn
+                  >
+                </v-time-picker>
+              </v-menu>
+            </div>
+          </div>
+        </v-flex>
+      </v-layout>
 
-    <v-flex class="divider">
-      <v-menu
-        ref="menuHoraDesde"
-        v-model="menuHoraDesde"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        :return-value.sync="horaDesde"
-        lazy
-        transition="scale-transition"
-        offset-y
-        full-width
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field v-model="horaDesde" label="Desde" prepend-icon="alarm" readonly v-on="on"></v-text-field>
-        </template>
-        <v-time-picker v-model="horaDesde" format="24hr" no-title scrollable>
-          <v-spacer></v-spacer>
-          <v-btn flat color="primary" @click="menuHoraDesde = false">Cancelar</v-btn>
-          <v-btn flat color="primary" @click="$refs.menuHoraDesde.save(horaDesde)">OK</v-btn>
-        </v-time-picker>
-      </v-menu>
-    </v-flex>
+      <v-layout justify-space-between row align-center>
+        <v-flex class="divider" xs4>
+          <div class="switches_wrapper">
+            <v-switch
+              v-model="tiempoRealSwitch"
+              class="my-0 py-0"
+              @change="toggleWS($event)"
+              label="Tiempo Real"
+              color="indigo"
+              hide-details
+            ></v-switch>
+            <v-progress-linear
+              indeterminate
+              color="indigo"
+              v-show="detalleTendencia.historicosPV.length === 0 && tiempoReal"
+              class="loading_bar_ws"
+            ></v-progress-linear>
+          </div>
+        </v-flex>
 
-    <v-flex>
-      <v-menu
-        ref="menuFechaHasta"
-        v-model="menuFechaHasta"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        :return-value.sync="fechaHasta"
-        lazy
-        transition="scale-transition"
-        offset-y
-        full-width
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field v-model="fechaHasta" label="Hasta" prepend-icon="event" readonly v-on="on"></v-text-field>
-        </template>
-        <v-date-picker v-model="fechaHasta" no-title scrollable>
-          <v-spacer></v-spacer>
-          <v-btn flat color="primary" @click="menuFechaHasta = false">Cancelar</v-btn>
-          <v-btn flat color="primary" @click="$refs.menuFechaHasta.save(fechaHasta)">OK</v-btn>
-        </v-date-picker>
-      </v-menu>
-    </v-flex>
+        <v-flex xs4>
+          <div class="btn_clear">
+            <v-btn
+              v-show="showClearBtn()"
+              outline
+              fab
+              icon
+              small
+              color="grey"
+              @click="clearFields"
+            >
+              <v-icon style="margin-top:18px;">delete</v-icon>
+            </v-btn>
+          </div>
+        </v-flex>
 
-    <v-flex class="divider">
-      <v-menu
-        ref="menuHoraHasta"
-        v-model="menuHoraHasta"
-        :close-on-content-click="false"
-        :nudge-right="40"
-        :return-value.sync="horaHasta"
-        lazy
-        transition="scale-transition"
-        offset-y
-        full-width
-      >
-        <template v-slot:activator="{ on }">
-          <v-text-field v-model="horaHasta" label="Hasta" prepend-icon="alarm" readonly v-on="on"></v-text-field>
-        </template>
-        <v-time-picker v-model="horaHasta" format="24hr" no-title scrollable>
-          <v-spacer></v-spacer>
-          <v-btn flat color="primary" @click="menuHoraHasta = false">Cancelar</v-btn>
-          <v-btn flat color="primary" @click="$refs.menuHoraHasta.save(horaHasta)">OK</v-btn>
-        </v-time-picker>
-      </v-menu>
-    </v-flex>
+        <v-flex xs4>
+          <div class="btn_wrapper">
+            <v-alert
+              :value="true"
+              color="error"
+              icon="warning"
+              outline
+              class="pa-2 alert__result"
+              v-show="filterResultsAlert"
+            >
+              <small style="min-width:100px;">No se encontraron resultados en el rango indicado</small>
+            </v-alert>
 
-    <v-flex pl-2>
-      <v-btn
-        :disabled="!tendenciaSeleccionada"
-        dark
-        class="mt-3"
-        :loading="loading"
-        block
-        @click="getDetalleTendencia()"
-      >
-        <v-icon>filter_list</v-icon>
-        <span>Filtrar</span>
-      </v-btn>
-    </v-flex>
-    <!-- <v-flex xs12>
-      <template v-for="(item, i) in historicosProductos">
-        <v-btn
-          :key="i"
-          v-if="item.codigo !== null"
-          color="blue"
-          :outline="parseInt(detalleTendencia.productoFiltrado.codigo) === parseInt(item.codigo) ? false : true"
-          @click="getDetalleTendencia(item.codigo)"
-        >
-          <v-icon>storage</v-icon>
-          <span class="ml-3 mr-1">{{item.codigo ? item.codigo : 'SIN CODIGO'}}</span> -
-          <span class="ml-1">{{item.descripcion ? item.descripcion : 'SIN DESCRIPCION'}}</span>
-        </v-btn>
-      </template>
-    </v-flex> -->
-  </v-layout>
+            <v-btn
+              :disabled="!tendenciaSeleccionada || tiempoReal"
+              v-show="!tiempoReal"
+              class="mx-0 btn__filtrar"
+              :loading="loading"
+              @click="getDetalleTendencia()"
+            >
+              <v-icon>filter_list</v-icon>
+              <span>Filtrar</span>
+            </v-btn>
+          </div>
+        </v-flex>
+      </v-layout>
+    </v-container>
+  </v-form>
 </template>
 
 <script>
@@ -202,7 +322,8 @@ import moment from 'moment'
 export default {
   data() {
     return {
-      tiempoReal: false,
+      valid: true,
+      tiempoRealSwitch: false,
       menuFechaDesde: false,
       menuHoraDesde: false,
       menuFechaHasta: false,
@@ -210,7 +331,7 @@ export default {
       fechaDesde: null,
       fechaHasta: null,
       horaDesde: '06:00:00',
-      horaHasta: '06:00:00',
+      horaHasta: '07:00:00',
       fechas: [],
       tendencias: [],
       tendenciasItems: [],
@@ -218,7 +339,7 @@ export default {
       loadingTendencias: false,
       productos: [],
       productosItems: [],
-      productoSeleccionada: null,
+      productosSeleccionados: [],
       loadingProductos: false,
       tecnologias: [],
       tecnologiasItems: [],
@@ -229,28 +350,16 @@ export default {
       mixersSeleccionada: [],
       loadingMixers: false,
       loading: false,
-      historicosProductos: []
+      historicosProductos: [],
+      filterResultsAlert: false,
+      nameRules: [
+        v => !!v || 'Campo requerido'
+        //v => (v && v.length <= 10) || 'Name must be less than 10 characters'
+      ]
     }
   },
 
   watch: {
-    // async tecnologiasSeleccionada() {
-    //   this.mixersItems = []
-    //   this.tendenciasItems = []
-    //   this.productosItems = []
-    //   if (
-    //     this.tecnologiasSeleccionada.length === 0 ||
-    //     this.tecnologiasSeleccionada.length === this.tecnologiasItems.length
-    //   ) {
-    //     this.mixersItems = this.mixers
-    //     this.tendenciasItems = this.tendencias
-    //     this.productosItems = this.productos
-    //   } else {
-    //     await this.getMixersByTecnologias()
-    //     await this.getTendenciasByTecnologias()
-    //     // await this.getProductosByTecnologias()
-    //   }
-    // },
     async mixersSeleccionada() {
       this.tendenciasItems = []
       this.productosItems = []
@@ -265,14 +374,14 @@ export default {
         await this.getProductosByMixers()
       }
     },
-      async tendenciaSeleccionada() {
-       this.productosItems = []
-       if (this.tendenciaSeleccionada) {
-          this.productosItems = this.productos
-        } else {
-          await this.getProductosByTendencia()
-        }
-      },
+    async tendenciaSeleccionada() {
+      this.productosItems = []
+      if (this.tendenciaSeleccionada) {
+        this.productosItems = this.productos
+      } else {
+        await this.getProductosByTendencia()
+      }
+    },
     detalleTendencia() {
       this.historicosProductos = this.$store.state.socket.detalleTendencia.historicosProductos
     }
@@ -296,31 +405,88 @@ export default {
           this.getDetalleTendencia()
         }
       }
+    },
+    tiempoReal() {
+      return this.$store.state.socket.tiempoReal
+    },
+    dates() {
+      return [
+        moment(new Date(this.fechaDesde + ' ' + this.horaDesde)).format(
+          'YYYY-MM-DD HH:mm:ss'
+        ),
+        moment(new Date(this.fechaHasta + ' ' + this.horaHasta)).format(
+          'YYYY-MM-DD HH:mm:ss'
+        )
+      ]
+    },
+    params() {
+      return {
+        mixer: this.mixersSeleccionada,
+        tendencia: this.tendenciaSeleccionada,
+        productos: this.productosSeleccionados,
+        fechas: this.dates
+      }
     }
   },
 
   mounted() {
+    this.tiempoRealSwitch = this.$store.state.socket.tiempoReal
     this.fechaDesde = moment()
       .add(-7, 'days')
       .format('YYYY-MM-DD')
 
     this.fechaHasta = moment().format('YYYY-MM-DD')
 
-    this.fechas = [
-      new Date(
-        moment()
-          .add(-7, 'days')
-          .format('YYYY-MM-DD HH:mm:ss')
-      ),
-      new Date()
-    ]
-    this.getTendencias()
-   // this.getTecnologias()
+    this.fechas = [new Date(this.fechaDesde), new Date(this.fechaHasta)]
     this.getMixers()
-     this.getProductos()
+    this.getTendencias()
+    this.getProductos()
   },
 
   methods: {
+    showClearBtn() {
+      if (!this.tiempoReal) {
+        if (this.tendenciaSeleccionada) {
+          return true
+        }
+        if (this.productosSeleccionados.length > 0) {
+          return true
+        }
+        if (this.mixersSeleccionada.length > 0) {
+          return true
+        }
+        return false
+      }
+      return false
+    },
+    clearFields() {
+      this.mixersSeleccionada = []
+      this.tendenciaSeleccionada = null
+      this.productosSeleccionados = []
+      this.fechaDesde = moment()
+        .add(-7, 'days')
+        .format('YYYY-MM-DD')
+      this.fechaHasta = moment().format('YYYY-MM-DD')
+      this.$refs.form.resetValidation()
+      this.$emit('clear')
+    },
+    toggleWS(e) {
+      try {
+        if (e) {
+          this.$store.commit('socket/SET_TIEMPO_REAL', true)
+          this.$store.commit('socket/SOCKET', this.$ws)
+
+        } else {
+          this.$store.commit('socket/SET_TIEMPO_REAL', false)
+          this.$store.commit('socket/DISCONNECT_SOCKET', this.$ws)
+          this.$store.commit('socket/RESET_DETALLE_TENDENCIA')
+        }
+        this.tiempoRealSwitch = this.$store.state.socket.tiempoReal
+
+      } catch (error) {
+        console.log('ERROR_TIEMPO_REAL_FILTER:', error)
+      }
+    },
     async getTendencias() {
       this.loadingTendencias = true
 
@@ -373,26 +539,6 @@ export default {
       )
       this.loadingTendencias = false
     },
-    // async getTecnologias() {
-    //   this.loadingTecnologias = true
-
-    //   const payload = {
-    //     params: {
-    //       select: ['nombre', 'id'],
-    //       paginate: false
-    //     }
-    //   }
-
-    //   await axios.get('tecnologias', payload).then(response => {
-    //     this.tecnologias = response.data.data.map(item => {
-    //       item.text = item.nombre
-    //       item.value = item.id
-    //       return item
-    //     })
-    //     this.tecnologiasItems = this.tecnologias
-    //     this.loadingTecnologias = false
-    //   })
-    //},
     async getMixers() {
       this.loadingMixers = true
 
@@ -441,7 +587,7 @@ export default {
 
       const payload = {
         params: {
-          select: ['codigo', 'id'],
+          select: ['codigo', 'id', 'descripcion'],
           paginate: false
         }
       }
@@ -450,6 +596,7 @@ export default {
         this.productos = response.data.data.map(item => {
           item.text = item.codigo
           item.value = item.id
+          item.descripcion = item.descripcion
           return item
         })
         this.productosItems = this.productos
@@ -522,35 +669,47 @@ export default {
       })
     },
     async getDetalleTendencia(producto) {
-      this.loading = true
-      //this.productoSele = this.productoSeleccionada.codigo ?  producto : null
+      try {
+        if (this.$refs.form.validate()) {
+          this.$store.commit('tendencia/SET_SELECTED_PARAMS', this.params)
+          this.loading = true
+          //this.productoSele = this.productosSeleccionados.codigo ?  producto : null
 
-      this.fechas = [
-        moment(new Date(this.fechaDesde + ' ' + this.horaDesde)).format(
-          'YYYY-MM-DD HH:mm:ss'
-        ),
-        moment(new Date(this.fechaHasta + ' ' + this.horaHasta)).format(
-          'YYYY-MM-DD HH:mm:ss'
-        )
-      ]
-      const payload = {
-        params: {
-          tiempoReal: this.tiempoReal,
-          fechas: this.fechas,
-          producto: this.productoSeleccionada.codigo
+          const fechas = [
+            moment(new Date(this.fechaDesde + ' ' + this.horaDesde)).format(
+              'YYYY-MM-DD HH:mm:ss'
+            ),
+            moment(new Date(this.fechaHasta + ' ' + this.horaHasta)).format(
+              'YYYY-MM-DD HH:mm:ss'
+            )
+          ]
+          const payload = {
+            params: {
+              tiempoReal: this.tiempoReal,
+              fechas: fechas,
+              productos: this.productosSeleccionados
+            }
+          }
+
+          await axios
+            .get(`tendencias/${this.tendenciaSeleccionada.id}`, payload)
+            .then(response => {
+              console.log('Response tendencia:', response)
+              this.$store.commit('socket/SET_DETALLE_TENDENCIA', response.data)
+              this.$store.commit('tendencia/RESET_INDEX_TENDENCIA_LIMITE')
+              this.loading = false
+              if (response.data.historicosPV.length == 0) {
+                this.filterResultsAlert = true
+                setTimeout(() => {
+                  this.filterResultsAlert = false
+                }, 3000)
+              }
+            })
         }
+      } catch (error) {
+        console.log('GET_DETALLE_TENDENCIA_ERROR:', error)
+        this.loading = false
       }
-      await axios
-        .get(`tendencias/${this.tendenciaSeleccionada.id }`, payload)
-        .then(response => {
-          this.$store.commit('socket/SET_DETALLE_TENDENCIA', response.data)
-          this.$store.commit(
-            'socket/SET_TENDENCIA_SELECCIONADA',
-            this.tendenciaSeleccionada
-          )
-          this.$store.commit('socket/SET_TIEMPO_REAL', this.tiempoReal)
-          this.loading = false
-        })
     }
   }
 }
@@ -568,7 +727,87 @@ export default {
   line-height: 1.5;
   font-size: 14px;
 }
-/* .divider {
-  border-right: 1px solid rgb(230, 230, 230);
-} */
+.switches_wrapper {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.btn_wrapper {
+  display: flex;
+  justify-content: flex-end;
+  height: 95%;
+}
+.filtro_tendencia_container {
+  padding: 0rem 1.5rem 0rem 1.5rem;
+}
+
+.alert__result {
+  margin-top: 6px;
+  height: 36px;
+  border-radius: 5px;
+  background-color: white;
+  font-size: 16px;
+}
+.btn_clear {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 52px;
+}
+.frame {
+  padding-left: 15px;
+  border: solid 1px gray;
+  border-radius: 5px;
+  height: 58px;
+  background: white;
+}
+.wrapper {
+  display: flex;
+  justify-content: space-around;
+}
+.divider__style {
+  height: 5px;
+  margin-right: 10px;
+}
+.main__container {
+  background: rgb(238, 240, 255);
+  border: solid 1px gray;
+  max-height: 225px;
+  min-height: 62px;
+}
+</style>
+
+<style>
+.frame div {
+  height: 30px !important;
+  min-height: 0px !important;
+  margin: 0;
+  background: white;
+}
+.frame div .v-input__prepend-outer {
+  margin-top: 0 !important;
+}
+.btn__filtrar {
+  border-radius: 5px;
+  background: black!important;
+  color: white!important;
+}
+.combo__filter {
+  background: white;
+  background-color: white;
+  border-radius: 5px;
+  border: solid 1px gray;
+}
+</style>
+
+<style>
+.inputs__time .v-input input{
+  cursor: pointer!important;
+}
+
+.loading_bar_ws{
+  position: absolute;
+  left: 13rem;
+  width: 95rem;
+}
 </style>

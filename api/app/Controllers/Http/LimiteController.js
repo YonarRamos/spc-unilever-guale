@@ -2,42 +2,44 @@
 
 const Limite = use('App/Models/Limite');
 const Historico = use('App/Models/Historico');
+const LimitesHistorico = use('App/Models/LimitesHistorico');
 const Database = use('Database');
 const moment = require('moment');
 const mathjs = require('mathjs');
+const { query } = require('../../Models/Limite');
 
 class LimiteController {
   async index({ request, response }) {
     try{
-    let { tendencia, productos, desde, hasta } = request.get();
-    tendencia = tendencia || null;
-    productos = productos || [];
-    hasta = hasta || moment().format('YYYY-MM-DD HH:mm:ss');
-    desde =
-      desde ||
-      moment(hasta)
-        .add(-100, 'days')
-        .format('YYYY-MM-DD HH:mm:ss');
+      let { tendencia_id, productos, desde, hasta } = request.get();
+      //console.log('PARAMS:', request.get())
+      tendencia_id = tendencia_id || null;
+      productos = productos || [];
+      hasta = hasta || moment().format('YYYY-MM-DD HH:mm:ss');
+      desde = desde || moment().add(-1000, 'days').format('YYYY-MM-DD HH:mm:ss');
 
-    let limites = [];
-    if (productos.length === 0) {
-      limites = await Limite.query()
-        .where('tendencia_id', tendencia)
-        .whereBetween('ini', [desde, hasta])
-        .orderBy('ini', 'ASC')
-        .fetch();
-    } else {
-      limites = await Limite.query()
-        .whereIn('codigo_producto', productos)
-        .where('tendencia_id', tendencia)
-        .whereBetween('ini', [desde, hasta])
-        .orderBy('ini', 'ASC')
-        .fetch();
+      let query = Limite.query();
+      let limites = [];
+      
+      console.log( 'tendencia_id:', tendencia_id, 'productos:', productos, desde, hasta )
+
+      if (productos.length > 0) {
+        query.whereIn('codigo_producto', productos)
+      }
+      if(tendencia_id){
+          query.where('tendencia_id', parseInt(tendencia_id))
+      }
+
+
+      limites = await query
+                  .whereBetween('ini', [moment(desde).format('YYYY-MM-DD HH:mm:ss'), moment(hasta).format('YYYY-MM-DD HH:mm:ss')])
+                  .orderBy('ini', 'ASC')
+                  .fetch();
+      //console.log('LIMITES::', limites.toJSON())
+      return response.status(200).json(limites);
+    }catch(error){
+      console.log(error)
     }
-    response.status(200).json(limites);
-  }catch(error){
-    console.log(error)
-  }
   }
 
   async store({ request, response }) {
@@ -57,10 +59,11 @@ class LimiteController {
       'media_rango',
       'ultimo',
       'codigo_producto',
-      'tendencia_id'
+      'tendencia_id',
+      'nombre'
     ]);
-
-    data.int1 = moment().format('YYYY-MM-DD HH:mm:ss')
+    console.log(data)
+    data.ini = moment().format('YYYY-MM-DD HH:mm:ss')
     const limite = await Limite.create(data);
     response.status(201).json(limite);
   }catch(error){
@@ -69,100 +72,137 @@ class LimiteController {
   }
 
   async show({ request, response, params: { id } }) {
-    const limite = await Limite.findOrFail(id);
-    
-    if (!limite) {
-      response.status(404).json({
-        message: 'Limite no encontrada.',
+    try {
+      const limite = await Limite.findOrFail(id);
+      response.status(200).json(limite.toJSON());
+    } catch (error) {
+      return response.status(404).json({
+        message: 'Limite no encontrado.',
         id
       });
-      return;
     }
-    response.status(200).json(resp);
+
   }
 
   async update({ request, response, params: { id } }) {
-    const data = request.only([
-      'lh_1sigma',
-      'll_1sigma',
-      'lh_2sigma',
-      'll_2sigma',
-      'lh_3sigma',
-      'll_3sigma',
-      'usl',
-      'lsl',
-      'usl_rango',
-      'lsl_rango',
-      'media',
-      'media_rango',
-      'codigo_producto',
-      'tendencia_id'
-    ]);
-    const limite = await Limite.find(id);
+    try {
+      const now = moment().format('YYYY-MM-DD HH:mm:ss')
+      const data = request.only([
+        'lh_1sigma',
+        'll_1sigma',
+        'lh_2sigma',
+        'll_2sigma',
+        'lh_3sigma',
+        'll_3sigma',
+        'usl',
+        'lsl',
+        'usl_rango',
+        'lsl_rango',
+        'media',
+        'media_rango',
+        'codigo_producto',
+        'tendencia_id',
+        'nombre'
+      ]);
+      const limite = await Limite.find(id);
 
-    if (!limite) {
-      response.status(404).json({
-        message: 'Limite no encontrada.',
-        id
-      });
-      return;
+      if (!limite) {
+        response.status(404).json({
+          message: 'Limite no encontrada.',
+          id
+        });
+        return;
+      }
+      var newLimite = {}
+      newLimite.nombre = data.nombre || limite.nombre;
+      newLimite.lh_1sigma = data.lh_1sigma || limite.lh_1sigma;
+      newLimite.ll_1sigma = data.ll_1sigma || limite.ll_1sigma;
+      newLimite.lh_2sigma = data.lh_2sigma || limite.lh_2sigma;
+      newLimite.ll_2sigma = data.ll_2sigma || limite.ll_2sigma;
+      newLimite.lh_3sigma = data.lh_3sigma || limite.lh_3sigma;
+      newLimite.ll_3sigma = data.ll_3sigma || limite.ll_3sigma;
+      newLimite.usl = data.usl || limite.usl;
+      newLimite.lsl = data.lsl || limite.lsl;
+      newLimite.usl_rango = data.usl_rango || limite.usl_rango;
+      newLimite.lsl_rango = data.lsl_rango || limite.lsl_rango;
+      newLimite.media = data.media || limite.media;
+      newLimite.media_rango = data.media_rango || limite.media_rango;
+      newLimite.codigo_producto = data.codigo_producto || limite.codigo_producto;
+      newLimite.tendencia_id = data.tendencia_id || limite.tendencia_id;
+      newLimite.ini = now
+
+      limite.merge({ end: now })
+      await limite.save();
+      const savedLimit = await Limite.create(newLimite);
+      const newHistLimit = { id_actual:savedLimit.id , id_anterior:limite.id }
+      await LimitesHistorico.create(newHistLimit)
+
+      //Actualizamos el id_actual de los limites anterior que pertenece al que acabamos de crear
+      const oldLimits = await LimitesHistorico
+      .query()
+      .where('id_actual', limite.id)
+      .update({ id_actual: savedLimit.id })
+
+
+      return response.status(200).json(limite);      
+    } catch (error) {
+      return console.log('UPDATE_LIMIT_ERROR:', error)
     }
-    var newLimite = {}
-    newLimite.lh_1sigma = data.lh_1sigma || limite.lh_1sigma;
-    newLimite.ll_1sigma = data.ll_1sigma || limite.ll_1sigma;
-    newLimite.lh_2sigma = data.lh_2sigma || limite.lh_2sigma;
-    newLimite.ll_2sigma = data.ll_2sigma || limite.ll_2sigma;
-    newLimite.lh_3sigma = data.lh_3sigma || limite.lh_3sigma;
-    newLimite.ll_3sigma = data.ll_3sigma || limite.ll_3sigma;
-    newLimite.usl = data.usl || limite.usl;
-    newLimite.lsl = data.lsl || limite.lsl;
-    newLimite.usl_rango = data.usl_rango || limite.usl_rango;
-    newLimite.lsl_rango = data.lsl_rango || limite.lsl_rango;
-    newLimite.media = data.media || limite.media;
-    newLimite.media_rango = data.media_rango || limite.media_rango;
-    newLimite.codigo_producto = data.codigo_producto || limite.codigo_producto;
-    newLimite.tendencia_id = data.tendencia_id || limite.tendencia_id;
-    newLimite.ini = moment().format('YYYY-MM-DD HH:mm:ss')
-    limite.end = moment().format('YYYY-MM-DD HH:mm:ss')
-    await limite.save();
-    await Limite.create(newLimite);
-
-    response.status(200).json(limite);
   }
 
   async destroy({ request, response, params: { id } }) {
-    const limite = await Limite.find(id);
+    try {
+      const limite = await Limite.find(id);
+      const isLimite = await Historico.findBy('limite_id', id);
 
-    if (!limite) {
-      response.status(404).json({
-        message: 'Limite no encontrada.',
-        id
-      });
-      return;
-    }
-
-    const tendencia_id = limite.tendencia_id;
-    const transaction = await Database.transaction(async trx => {
-      await limite.delete();
-
-      const limiteUpdate = await Limite.query()
-        .orderBy('created_at', 'DESC')
-        .where('tendencia_id', tendencia_id)
-        .where('codigo_producto', limite.codigo_producto)
-        .whereNot('id', id)
-        .first();
-
-      if (limiteUpdate) {
-        await trx
-          .table('limites')
-          .where('id', limiteUpdate.id)
-          .update({ ultimo: true });
+      if (!limite) {
+        response.status(404).json({
+          message: 'Limite no encontrada.',
+          id
+        });
+        return;
       }
 
-      return true;
-    });
+      if (isLimite) {
+        response.status(400).json({
+          message: 'Límite utilizado en datos ya procesados.',
+          id
+        });
+        return;
+      }
 
-    response.status(201).json(transaction);
+      const tendencia_id = limite.tendencia_id;
+      const transaction = await Database.transaction(async trx => {
+        await limite.delete();
+
+        await LimitesHistorico
+        .query()
+        .where('id_actual', id)
+        .delete()
+
+        const limiteUpdate = await Limite.query()
+          .orderBy('ini', 'DESC')
+          .where('tendencia_id', tendencia_id)
+          .where('codigo_producto', limite.codigo_producto)
+          .whereNot('id', id)
+          .first();
+
+        if (limiteUpdate) {
+          await trx
+            .table('limites')
+            .where('id', limiteUpdate.id)
+            .update({ ultimo: true });
+        }
+
+        return true;
+      });
+
+      response.status(200).json(transaction);      
+    } catch (error) {
+      console.log("ERROR_DELETE_LIMITE:", error)
+      response.status(400).json({message:error});
+    }
+
   }
 
   async limiteByHistoricos({ request, response }) {

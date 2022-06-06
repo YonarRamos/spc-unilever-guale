@@ -1,6 +1,7 @@
 import axios from '@/plugins/axios'
 
 export const state = () => ({
+  usuario:{},
   usuarios: {
     total: 20,
     perPage: 20,
@@ -21,7 +22,7 @@ export const mutations = {
     state.usuario = usuario
   },
   SET_USUARIOS(state, usuarios) {
-    state.usuario = usuarios
+    state.usuarios = usuarios
   },
   SET_PARAMS(state, params) {
     state.params = params
@@ -30,14 +31,14 @@ export const mutations = {
 
 export const actions = {
   async getAll() {
-  
       await axios
       .get('usuarios', {
         params: this.state.usuario.params
       })
       .then(response => {
-        this.commit('usuario/SET_USUARIOS', response.data.data)
-
+        console.log('usuarios::', response.data)
+        this.commit('usuario/SET_USUARIOS', response.data)
+        console.log('Ejecutando getUsuarios from store')
       })
       .catch(error => {
         console.error(error)
@@ -47,10 +48,10 @@ export const actions = {
   async create(context, payload) {
     await axios
       .post('users', payload.content.usuario)
-      .then(response => {
+      .then( async response => {
         const usuario = response.data
-        this.dispatch('usuario/getAll')
         this.commit('notification/ALERT_SUCCESS', usuario.nombre)
+        await this.dispatch('usuario/getAll')
       })
       .catch(error => {
         const _error =
@@ -64,9 +65,10 @@ export const actions = {
   async update(context, payload) {
     await axios
       .put(`users/${payload.content.usuario.id}`, payload.content.usuario)
-      .then(response => {
+      .then(async response => {
         const usuario = response.data
         this.commit('notification/ALERT_SUCCESS', usuario.nombre)
+        await this.dispatch('usuario/getAll')
       })
       .catch(error => {
         const _error =
@@ -80,9 +82,10 @@ export const actions = {
   async delete(context, payload) {
     await axios
       .delete(`users/${payload.content.usuario.id}`)
-      .then(response => {
+      .then( async response => {
         const usuario = response.data
         this.commit('notification/ALERT_SUCCESS', usuario.nombre)
+        await this.dispatch('usuario/getAll')
       })
       .catch(error => {
         const _error =

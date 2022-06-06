@@ -63,6 +63,7 @@
           :total-items="parseInt(destinatarios.total)"
           :loading="loading"
           class="elevation-0 mb-1"
+          ref="myTable"
         >
           <template v-slot:items="props">
             <tr>
@@ -72,7 +73,7 @@
               <td class="text-xs-left">{{ props.item.nombre }}</td>
               <td class="text-xs-left">{{ props.item.apellido }}</td>
               <td class="text-xs-left">
-                <v-switch color="blue" class="pt-3" v-model="props.item.envio"></v-switch>
+                <v-switch color="blue" class="pt-3" v-model="props.item.envio"  @change="toggleEnvio(props.item)"></v-switch>
               </td>
               <td class="text-xs-right">
                 <v-icon class="mr-2" color="blue" @click="editarDestinatario(props.item)">edit</v-icon>
@@ -87,6 +88,7 @@
       v-if="modalFormularioDestinatario"
       :destinatario="destinatario"
       :operacion="operacion"
+      @reload="reloadComponent"
     />
   </div>
 </template>
@@ -108,6 +110,13 @@ export default {
       pagination: {},
       operacion: 'create',
       valid: false,
+      destinatarios:{
+        total: 20,
+        perPage: 20,
+        page: 1,
+        lastPage: 1,
+        data: []
+      },
       destinatario: {
         nombre: '',
         descripcion: ''
@@ -144,9 +153,9 @@ export default {
   },
 
   computed: {
-    destinatarios() {
+    /* destinatarios() {             
       return this.$store.state.destinatario.destinatarios
-    },
+    }, */
     params() {
       return this.$store.state.destinatario.params
     },
@@ -163,16 +172,31 @@ export default {
       }
       this.operacion = 'create'
       this.$store.commit('modal/MODAL_FORMULARIO_DESTINATARIO')
+      
     },
     async eliminarDestinatario(destinatario) {
       this.destinatario = destinatario
       this.operacion = 'delete'
       this.$store.commit('modal/MODAL_FORMULARIO_DESTINATARIO')
+      
     },
     async editarDestinatario(destinatario) {
       this.destinatario = destinatario
       this.operacion = 'edit'
       this.$store.commit('modal/MODAL_FORMULARIO_DESTINATARIO')
+    },
+    async toggleEnvio(destinatario){
+      const payload = {
+        content: {
+          destinatario: destinatario
+        }
+      }
+      await this.$store
+        .dispatch('destinatario/update', payload)
+        .then(async response => {
+          await this.getDestinatarios()
+        })
+        .catch(error => console.error('EDIT_DESTINATARIO_ERROR:', error))
     },
     async getDestinatarios() {
       this.loading = true
@@ -186,9 +210,12 @@ export default {
           : []
       }
       this.$store.commit('destinatario/SET_PARAMS', params)
-      this.$store
+      await this.$store
         .dispatch('destinatario/getAll')
-        .then(response => (this.loading = false))
+        .then( response => {
+          this.igualarDestinatarios()
+        })
+        this.loading = false
     },
     verBusqueda() {
       this.search = true
@@ -197,7 +224,18 @@ export default {
       this.search = false
       this.searchText = ''
       this.getDestinatarios()
+    },
+    igualarDestinatarios(){
+      this.destinatarios = JSON.parse(JSON.stringify(this.$store.state.destinatario.destinatarios))
+    },
+    async reloadComponent(){
+      console.log('ejecutando reload')
+      await this.getDestinatarios()
+      this.$refs.myTable.$forceUpdate()
     }
+  },
+  mounted(){
+    this.igualarDestinatarios()
   }
 }
 </script>

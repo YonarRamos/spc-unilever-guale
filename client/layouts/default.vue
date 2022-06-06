@@ -48,7 +48,7 @@ export default {
   },
 
   mounted() {
-    this.$store.commit('socket/SOCKET', this.$ws)
+    //this.$store.commit('socket/SOCKET', this.$ws)
     // window.addEventListener('scroll', this.handleScroll)
     setTimeout(() => {
       this.loading = false

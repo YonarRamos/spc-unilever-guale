@@ -4,17 +4,16 @@
       row
       wrap
       align-center
-      class="elevation-2 px-1 grey lighten-4"
-      :style="{borderRadius: '6px'}"
+      class="elevation-2 px-1 grey lighten-4 main__ajustes__layout"
     >
       <v-flex>
         <div :style="{display: 'flex', justifyContent: 'space-between'}">
           <v-chip
             label
             @click="expand = 'limites'"
-            :class="expand == 'limites' ? 'indigo white--text' : ''"
+            :class="expand == 'limites' ? 'grey lighten-1 blue-grey' : ''"
             :style="{width: '50%'}"
-          >Limites</v-chip>
+          ><span class="limites__title">Limites</span></v-chip>
         </div>
       </v-flex>
 
@@ -59,8 +58,7 @@
           :pagination.sync="pagination"
           :total-items="parseInt(tendencias.total)"
           :loading="loading"
-          class="elevation-0 mb-1"
-          :style="{marginTop: '0px', borderTop: '1px solid #E0E0E0'}"
+          class="elevation-0 mb-1 tabla__ajustes__tendencias"
         >
           <template v-slot:items="props">
             <tr :class="props.expanded ? 'grey lighten-4': ''">
@@ -155,12 +153,12 @@
           </template>
           <template v-slot:expand="props">
             <v-card flat class="grey lighten-4">
-              <v-card-text>
+              <v-card-text class="pt-0">
                 <v-expand-x-transition>
                   <div v-if="expand == 'tags'" style="white-space: nowrap">
                     <carta-expand-tags :tendencia="props.item" />
                   </div>
-                  <div v-if="expand == 'limites'" style="white-space: nowrap">
+                  <div v-if="expand == 'limites'" style="white-space:nowrap;" class="wrapper__carta__limites">
                     <carta-expand-limites :tendencia="props.item" />
                   </div>
                 </v-expand-x-transition>
@@ -257,7 +255,7 @@ export default {
         where: this.searchText
           ? [['nombre', 'like', `%${this.searchText}%`]]
           : [],
-        whereNotNull: 'mixer_id'
+        whereNotNull: 'mixer_id',
       }
 
       this.$store.commit('tendencia/SET_PARAMS', params)
@@ -333,5 +331,22 @@ export default {
 }
 </script>
 
-<style scoped>
+<style>
+.main__ajustes__layout{
+border-radius: 6px;
+}
+.tabla__ajustes__tendencias{
+  overflow-x: hidden !important;
+}
+.wrapper__carta__limites{
+  background-color: white;
+  -moz-box-shadow:    inset 0 0 8px #474545;
+  -webkit-box-shadow: inset 0 0 8px #474545;
+  box-shadow:         inset 0 0 8px #474545;
+  padding: 0.8rem;
+}
+.limites__title{
+  color: #263238;
+  font-weight: 600;
+}
 </style>

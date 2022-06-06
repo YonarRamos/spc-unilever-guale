@@ -10,6 +10,13 @@ export const state = () => ({
     data: []
   },
   limitesByTendencia: {
+    totalItems: 10,
+    perPage: 20,
+    page: 1,
+    lastPage: 1,
+    data: []
+  },
+  limitesHistorico: {
     total: 20,
     perPage: 20,
     page: 1,
@@ -36,6 +43,9 @@ export const mutations = {
   },
   SET_PARAMS(state, params) {
     state.params = params
+  },
+  SET_HISTORICO_LIMITES(state, payload){
+    state.limitesHistorico = payload
   }
 }
 
@@ -60,20 +70,42 @@ export const actions = {
       })
       .then(response => {
         console.log(response)
-        this.commit('limite/SET_LIMITES_POR_TENDENCIA', response.data)
+        this.commit('limite/SET_LIMITES_POR_TENDENCIA', response)
       })
       .catch(error => {
         console.error(error)
       })
   },
-
+  async getHistoricoLimites(context, params) {
+    console.log('PARAMSSS:', params)
+    await axios
+      .get(`limites/historico/${params.limit_id}`, {
+        params: params
+      })
+      .then(response => {
+        let data = response.data
+        data.data = data.data.map(item => {
+          return {
+            id:item.id,
+            id_actual:item.id_actual,
+            id_anterior: item.id_anterior,
+            ...item.limite
+          }
+        })
+        console.log('Respuesta limites historico:', data)
+        this.commit('limite/SET_HISTORICO_LIMITES', data)
+      })
+      .catch(error => {
+        console.error(error)
+      })
+  },
   async create(context, payload) {
     await axios
       .post('limites', payload.content.limite)
       .then(response => {
         const limite = response.data
         this.dispatch('limite/getAll')
-        this.commit('notification/ALERT_SUCCESS', limite.id)
+        this.commit('notification/ALERT_SUCCESS', `${limite.nombre} creado correctamente`)
       })
       .catch(error => {
         const _error =
@@ -107,7 +139,7 @@ export const actions = {
       .then(response => {
         const limite = response.data
         this.dispatch('limite/getAll')
-        this.commit('notification/ALERT_SUCCESS', limite.id)
+        this.commit('notification/ALERT_SUCCESS', `"${payload.content.limite.nombre}" eliminado correctamente`)
       })
       .catch(error => {
         const _error =

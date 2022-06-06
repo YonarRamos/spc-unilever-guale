@@ -122,6 +122,54 @@ var FormateaDatos = {
 
     return item;
   },
+  async socketsDataFormater(tendencias){
+    const data = {}
+    const arrPV = tendencias.map(item => {
+      return {
+        fecha: item.fecha,
+        pv: item.pv,
+        tendencia_id: item.tendencia_id,
+        limite_id: item.limite_id,
+        codigo_producto:item.codigo_producto
+      }
+    });
+    //Datos de prueba -- borrar
+    arrPV.push({
+      fecha: '2022-05-23 10:45:52',
+      pv: 850,
+      tendencia_id: 26,
+      limite_id: null,
+      codigo_producto: 16
+    },{
+      fecha: '2022-05-23 10:45:52',
+      pv: 850,
+      tendencia_id: 37,
+      limite_id: null,
+      codigo_producto: 16
+    },{
+      fecha: '2022-05-23 14:55:52',
+      pv: 950,
+      tendencia_id: 26,
+      limite_id: 5,
+      codigo_producto: 16
+    })
+    const historicosPV = await Promise.all(arrPV)
+
+    const arrSP = tendencias.map(item => {
+      return {
+        fecha: item.fecha,
+        sp: item.sp,
+        tendencia_id: item.tendencia_id,
+        limite_id: item.limite_id,
+        condigo_producto:item.codigo_producto
+      }
+    });
+
+    const historicosSP = await Promise.all(arrSP)
+    data.historicosPV = historicosPV
+    data.historicosSP = historicosSP
+    return data
+  },
   async filtraDatos(sinFiltrar, filtro){
     return new Promise(async function (resolve, reject) {
       try {
@@ -147,13 +195,14 @@ var FormateaDatos = {
         var index = 0
         const sp = datos.sp.length > 0 ? true : false
         const cp = datos.cp.length > 0 ? true : false
+
         for await(const pv of datos.pv){
           response.push({
             fecha: moment(pv.Timestamp).format('YYYY-MM-DD HH:mm:ss'),
             pv: parseFloat((pv.ValueFloat).toFixed(2)),
             sp: sp ? parseFloat((datos.sp[index].ValueFloat).toFixed(2)) : null,
             tk: datos.tk,
-            codigo_producto: cp ? datos.cp[index].ValueFloat : null,
+            codigo_producto: cp ? ( datos.cp[index] ? datos.cp[index].ValueFloat : null) : null,
             tendencia_id: datos.tendencia_id,
             disparo_alarma: false,
             limite_id: null

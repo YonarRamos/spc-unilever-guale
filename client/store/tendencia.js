@@ -9,16 +9,31 @@ export const state = () => ({
     lastPage: 1,
     data: []
   },
+  indexTendenciaLimite:0,
   params: {
     perPage: 20,
     page: 1,
     sortBy: 'nombre',
     descending: 'ASC',
     where: []
-  }
+  },
+  selectedParams:{}
 })
 
 export const mutations = {
+  NEXT_INDEX_TENDENCIA_LIMITE(state, payload) {
+    if(state.indexTendenciaLimite < payload){
+      state.indexTendenciaLimite++
+    }
+  },
+  PREV_INDEX_TENDENCIA_LIMITE(state) {
+    if(state.indexTendenciaLimite > 0){
+      state.indexTendenciaLimite--
+    }
+  },
+  RESET_INDEX_TENDENCIA_LIMITE(state) {
+    state.indexTendenciaLimite = 0
+  },
   SET_TENDENCIA(state, tendencia) {
     state.tendencia = tendencia
   },
@@ -27,17 +42,21 @@ export const mutations = {
   },
   SET_PARAMS(state, params) {
     state.params = params
-  }
+  },
+  SET_SELECTED_PARAMS(state, payload) {
+    state.selectedParams = payload
+  },
 }
 
 export const actions = {
   async getAll(context) {
     await axios
-      .get('tendencias', {
+      .get('tendenciasTv', {
         params: this.state.tendencia.params
       })
-      .then(response => {
-        this.commit('tendencia/SET_TENDENCIAS', response.data)
+      .then(async response => {
+        console.log('getAll:',  response.data)
+        await this.commit('tendencia/SET_TENDENCIAS', response.data)
       })
       .catch(error => {
         console.error(error)
